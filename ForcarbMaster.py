@@ -18,8 +18,8 @@ from pandas import DataFrame
      
 #### FUNCTIONS #### 
     
-def availthvol(area, thin_intensity):
-    availablevolume = (thin_intensity*area*thinfreq)
+def availthvol(area, thin_yield):
+    availablevolume = (thin_yield*area*thinfreq)
     return availablevolume
 
    
@@ -41,9 +41,9 @@ def volinc(cai, area, standingvol):
         volha = newvol / (area )
     return volha
 
-def thinintensity(YC):
-    thin_intensity = YC*1*0.7
-    return thin_intensity
+def thin_yield_func(YC):
+    thin_yield = YC*1*0.7
+    return thin_yield
      
 def targetage(lst, target):
     i = 0
@@ -68,16 +68,11 @@ def previous(endpoint, prevarea, prevvol):
     
 
     
-os.chdir("D:\Data\DropDS\Notes & work\IrishLandUSes\Matrix")
-#os.chdir("C:\Users\UCD\Documents\Cloudstation\Notes & work\IrishLandUSes\Matrix")
+#os.chdir("D:\Data\DropDS\Notes & work\IrishLandUSes\Matrix")
+os.chdir("C:\Users\UCD\Documents\Cloudstation\Notes & work\IrishLandUSes\Matrix")
 
 
 ##### file managment
-#m = np.genfromtxt('dataframe24.csv', delimiter=',')
-#mdf = DataFrame(m)
-#endpoint = len(mdf.index)
-#endpoint_1 = endpoint
-#MatrixAllTest
 m_df = pd.read_csv("AgeMatrixNFI2012_NEW_Redux_12.csv",names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI'])
 #  MatrixAllTest
 #    https://docs.python.org/2/library/csv.html#examples
@@ -133,7 +128,7 @@ targetvolume = targetthin*cohortratio  # total volume from cohort
 thinvolume = 0
 runTotalThin_PA12 = 0
 runTotalThin_PS = 0
-thin_intensity_PA12 = thinintensity(YC_PA12)
+thin_yield_PA12 = thin_yield_func(YC_PA12)
 defor = 1000
 deforYear = 35
 affor = 500
@@ -171,6 +166,8 @@ a.writerow(output)
 prevthinvol = 0
 
 year = 1
+# cohort 1, cohort 2, etc
+# store each cohorts respective variables
 while year < 40:  
     PA12 = PA12[np.logical_not(np.logical_and(PA12[:,3] == 0, PA12[:,2] >= age_cf))]  #  , PA12[:,7] == 0
     newarea = 0
@@ -204,7 +201,7 @@ while year < 40:
     for z in range(endpointPA12):       
         ageClass[z] = PA12[z,2]
         area[z] = PA12[z,3]
-        availablevolume[z] = availthvol(area[z], thin_intensity_PA12)
+        availablevolume[z] = availthvol(area[z], thin_yield_PA12)
         if ageClass[z] < age_th:
             thinvolume = 0
         if age_th <= ageClass[z] < age_th_upper:
@@ -232,7 +229,7 @@ while year < 40:
         cai[z] = PA12[z,8]
         standingvol[z] = PA12[z,7] * PA12[z,3]  
     #####  thinning         
-        availablevolume[z] = availthvol(area[z], thin_intensity_PA12)
+        availablevolume[z] = availthvol(area[z], thin_yield_PA12)
         actualthinvol[z] = thincheck2(availablevolume[z])
         if standingvol[z] == 0:
             adjvol[z] = 0
@@ -416,7 +413,7 @@ while year < 40:
                 if year == afforYear: 
                     area[z] = clearfell_nextcycle_PA12 + affor
                 elif year == deforYear:
-                    area[z] = clearfell_nextcycle_PA12 + defor
+                    area[z] = clearfell_nextcycle_PA12 - defor
                 else:
                     area[z] = clearfell_nextcycle_PA12                     
                 area[z-1] = prevarea12[-1]                 
@@ -541,9 +538,20 @@ while year < 40:
     output = (["VolCheck1 = %.d" % LatestFinalVolume])
     a.writerow(output)    
     output = (["VolCheck2 = %.d" % EndRunVol] )   
-    a.writerow(output)    
+    a.writerow(output)   
+#    if year == afforYear: 
+#        areaTotal = areaTotal - affor
+#        output = (["Area check = %.2F" % areaTotal ])
+#        a.writerow(output)        
+#    elif year == deforYear:
+#        areaTotal = areaTotal + defor 
+#        output = (["Area check = %.2F" % areaTotal ])
+#        a.writerow(output)  
+#    else:    
+#        output = (["Area check = %.2F" % areaTotal ])
+#        a.writerow(output)
     output = (["Area check = %.2F" % areaTotal ])
-    a.writerow(output)
+    a.writerow(output)        
     output = (["Volume TargetTh = %.d" % targetthin ])    
 #    a.writerow(output)      
     output = (["Volume Thinned = %.d" % runTotalThin_PA12 ])    
@@ -662,4 +670,4 @@ while year < 40:
 #    dogs = finalvoltotal
     year = year + 1
         
-commaout.close()  
+commaout.close() 
