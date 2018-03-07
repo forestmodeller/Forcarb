@@ -1,6 +1,6 @@
 from IPython import get_ipython
 get_ipython().magic('reset -sf')
-#     %reset
+
 import numpy as np
 import csv
 import os
@@ -17,7 +17,7 @@ def availthvol(area, intensity):
 
    
 def thincheck2(availablevolume):
-    if ageClass[z] < age_th: # or ageClass >= age_th_upper:
+    if ageClass[z] < age_th:
         actualthinvol = 0
     elif age_th <= ageClass[z] < age_th_upper:
         actualthinvol = (availablevolume * targetThVolume / thinvolume)
@@ -28,8 +28,7 @@ def thincheck2(availablevolume):
 def volinc(cai, area, standingvol):
     vol_inc = cai * area
     newvol = standingvol + vol_inc
-    if newvol <= 0 or area <= 0:
-#    if newvol <= 0.0001 or area <= 0.0001        
+    if newvol <= 0 or area <= 0:       
         volha = 0
     else:
         volha = newvol / area 
@@ -60,16 +59,16 @@ def previous(cht, endpoint, prevarea, prevvol):
         prevvol[x] = volumelist[x]*arealist[x]
     return prevarea, prevvol 
     
+    
+######## file managment
+    
 #os.chdir("D:\Data\DropDS\Notes & work\IrishLandUSes\Matrix\Files")
 os.chdir("C:\Users\UCD\Documents\Cloudstation\Notes & work\IrishLandUSes\Matrix\Files")
 
+######## main input file
+m_df = pd.read_csv("AgeMatrixNFI2017_portion.csv",names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI'])
 
-#with open('AgeMatrixNFI2017.csv', mode='r') as infile:
-#    reader = csv.reader(infile)
-#    FM_TH = dict((rows[0],rows[1]) for rows in reader)
-
-
-### Harvest rules by year
+######## Harvest targets, Clearfell & Thinning rules by year
 with open('HarvestTargets.csv', mode='r') as infile:
     reader = csv.reader(infile)
     FM_TH = dict((rows[0],rows[1]) for rows in reader)   #p2
@@ -84,7 +83,6 @@ with open('HarvestTargets.csv', mode='r') as infile:
 #    AR_CF = dict((rows[0],rows[4]) for rows in reader)  
 ##        mydict = {rows[0]:rows[1] for rows in reader}   #p3    
 
-
 with open('ClearfellRules.csv', mode='r') as infile:
     reader = csv.reader(infile)
     CF_AGE_MIN = dict((rows[0],rows[1]) for rows in reader)
@@ -98,24 +96,27 @@ with open('ThinningHarvestRules.csv', mode='r') as infile:
 with open('ThinningHarvestRules.csv', mode='r') as infile:
     reader = csv.reader(infile)
     TH_VOLHA = dict((rows[0],rows[3]) for rows in reader)
-  
     
-##### file managment
-#m_df = pd.read_csv("AgeMatrixNFI2012_Redux_cohorts.csv",names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI'])
-m_df = pd.read_csv("AgeMatrixNFI2017_portion.csv",names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI'])
-
-##### cohort managment
-#PA = m_df[m_df.FT == 'PA']
+########  output file(s)
+commaout = open('matrix_output_list.csv',mode='wb')
+a = csv.writer(commaout, dialect='excel', delimiter=',')  
+prevout = open('prevarea_out.csv',mode='wb')
+b = csv.writer(prevout, dialect='excel', delimiter=',')  
+headers = 'Cohort', ' Year', ' Age', ' Area', ' VolPerHa', ' StandingVol', ' Thin/CF volume (if any)'  #' Standing Vol',
+a.writerow(headers)
+output = (["____________________________________________________________________"])        
+a.writerow(output)
+output = ([" "])        
+a.writerow(output)
+    
+    
+######## cohort managment
 PA = DataFrame(m_df, columns = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI'])
-#PA["newcht"] = PA["FT"].map(str) + PA["YC"]
 PA12 = PA[PA.YC == 12]
 endpoint_PA12 = len(PA12.index)
-#endpoint_PA12_1 = endpoint_PA12
-#endpoint = max(PA12.index)
 PA12 = PA12.values
 PA16 = PA[PA.YC == 16]
 endpoint_PA16 = len(PA16.index)
-#endpoint_PA16_1 = endpoint_PA16
 PA16 = PA16.values
 PA20 = PA[PA.YC == 20]
 endpoint_PA20 = len(PA20.index)
@@ -142,9 +143,9 @@ PA24 = PA24.values
 #OB = OB.values
 
 
-
+######## more cohort management
+######## begin cohort re-naming:
 cohortlist = 4 #(1,2)   # PA12, PA16, etc.
-
 for cohort in range(cohortlist):
     if cohort == 0: 
         prevarea_PA12 = [None]*endpoint_PA12
@@ -164,7 +165,7 @@ for cohort in range(cohortlist):
         prevarea_PA24, prevvol_PA24 = previous(PA24, endpoint_PA24, prevarea_PA24, prevvol_PA24)  
         
 
-### initialise variables
+######## initialise variables
 thinfreq = 0.2
 thinvolume = 0
 prevthinvol = 0
@@ -174,19 +175,13 @@ affor = 0 # 500
 afforYear = 25
 remainvol = 0
 newcohortvol = 0
-#newcohortarea_old = 0
-#newcohortarea = 0
 new_area = 0
-#newrow = [None]*9
-chk_newvol = 0
-runTotalThin_cht = 0
-runTotalThin_PS = 0
+#chk_newvol = 0
+thinTotal = 0
 sum_sv = 0
 sum_hv = 0
 annual_sv = 0
 areaFelled = 0
-#appendarea = 0
-#appendvol = 0
 clearfell_nextcycle_PA12 = 2000 
 clearfell_nextcycle_PA16 = 1800 
 clearfell_nextcycle_PA20 = 1800 
@@ -195,47 +190,28 @@ cohortratio = 0.13
 cohortratio_cf = 0.13
 increment = 1
 
-commaout = open('matrix_output_list.csv',mode='wb')
-a = csv.writer(commaout, dialect='excel', delimiter=',')  
-prevout = open('prevarea_out.csv',mode='wb')
-b = csv.writer(prevout, dialect='excel', delimiter=',')  
-headers = 'Cohort', ' Year', ' Age', ' Area', ' VolPerHa', ' StandingVol', ' Thin/CF volume (if any)'  #' Standing Vol',
-a.writerow(headers)
-output = (["____________________________________________________________________"])        
-a.writerow(output)
-output = ([" "])        
-a.writerow(output)
-
-
       
 year = 1906
-# cohort 1, cohort 2, etc
-# stores each cohort's respective variables
+######## stores each cohort's respective variables
 while year <= 2030:      
     for cohort in range(cohortlist):
-        if cohort == 0:  # PA12:
+        if cohort == 0:  
             cht = PA12
-#            endpoint_cht = endpoint_PA12
-#            endpoint_cht_1 = endpoint_PA12_1
             clearfell_nextcycle_cht = clearfell_nextcycle_PA12
             prevarea_cht = prevarea_PA12
             prevvol_cht = prevvol_PA12
-        elif cohort == 1:  # PA16:
-            cht = PA16
-#            endpoint_cht = endpoint_PA16
-#            endpoint_cht_1 = endpoint_PA16_1        
+        elif cohort == 1:  
+            cht = PA16       
             clearfell_nextcycle_cht = clearfell_nextcycle_PA16   
             prevarea_cht = prevarea_PA16
             prevvol_cht = prevvol_PA16   
-        elif cohort == 2:  # PA16:
-            cht = PA20
-#            endpoint_cht = endpoint_PA16       
+        elif cohort == 2: 
+            cht = PA20       
             clearfell_nextcycle_cht = clearfell_nextcycle_PA20 
             prevarea_cht = prevarea_PA20
             prevvol_cht = prevvol_PA20
-        elif cohort == 3:  # PA16:
-            cht = PA24
-#            endpoint_cht = endpoint_PA16        
+        elif cohort == 3: 
+            cht = PA24       
             clearfell_nextcycle_cht = clearfell_nextcycle_PA24
             prevarea_cht = prevarea_PA24
             prevvol_cht = prevvol_PA24               
@@ -246,13 +222,10 @@ while year <= 2030:
         YC_cht = cht[0,1]
         thin_intensity_cht = thin_intensity(YC_cht)
         
-#        n = np.sum((np.where(cht[:,3] >0),np.where(cht[:,5]>0)),axis = 1)[0][-1]
-#        cht = cht[:(n+1)]
         newarea = 0
         endpoint_cht = len(cht)
         if clearfell_nextcycle_cht == "NoCF":
             clearfell_nextcycle_cht = 0
-#            newcohortarea_old = newcohortarea
         else:
             clearfell_nextcycle_cht = clearfell_nextcycle_cht
         area = [None]*endpoint_cht     
@@ -262,11 +235,11 @@ while year <= 2030:
         sumvolcheck1 = 0  
         remainvol = 0
         cfVolCheck = 0
-        run_check_inc = 0
-        run_check_inc_early = 0
-        run_check_inc_one = 0
-        run_check_inc_two = 0
-        run_check_inc_three = 0
+        volIncPostHarvest = 0
+        volIncPreHarvest = 0
+        volIncNotFelled = 0
+        volIncFelled = 0
+        volIncFelled2 = 0
         thinvolumecheck = [None]*endpoint_cht
         check_inc = [0]*endpoint_cht
         targetthin = 940846
@@ -291,7 +264,7 @@ while year <= 2030:
             prevthinvol = thinvolume   
             sumvolcheck1 += cht[z,7] * cht[z,3]
         originalvoltotal = sumvolcheck1 
-        chk_newvol = 0
+#        chk_newvol = 0
         area = [None]*endpoint_cht     
         ageClass = [None]*endpoint_cht    
         for z in range(endpoint_cht):
@@ -309,46 +282,41 @@ while year <= 2030:
             area[z] = cht[z,3]      
             volha[z] = cht[z,7]  
             cai[z] = cht[z,8]
-            standingvol[z] = prevvol_cht[z] # cht[z,7] * cht[z,3]  
-        #####  thinning         
+            standingvol[z] = prevvol_cht[z] 
+########  thinning         
             availablevolume[z] = availthvol(area[z], thin_intensity_cht)
             actualthinvol[z] = thincheck2(availablevolume[z])
             if standingvol[z] == 0:
                 adjvol[z] = 0
             else:
                 adjvol[z] = standingvol[z] - actualthinvol[z]
-        #####   clearfell
+########   clearfell
             if ageClass[z] >= age_cf and volha[z] >= volha_cf:
                 runVolCheck = 0
                 availablevolume_cf = 0
                 availablearea_cf = 0   
-#                adjvol[z] = prevvol_cht[z]
                 ageClassCount = 0
                 for y in range(z, endpoint_cht):
-                    availablevolume_cf += (cht[y,7] * cht[y,3])   #prevvol_cht[y] #
+                    availablevolume_cf += (cht[y,7] * cht[y,3])   
                     availablearea_cf += cht[y,3]
                     ageClassCount += 1
                 if targetvol < availablevolume_cf:
-#                    print "%.d -  target < available" % remainarea
+                    print "%.d -  target < available" % year
                     that_check_inc = 0
                     standingvollist = [None]*endpoint_cht  
                     standingarealist = [None]*endpoint_cht
                     for y in range(endpoint_cht):        
-                        standingvollist[y] =  cht[y,7] * cht[y,3]  #prevvol_cht[y] #
+                        standingvollist[y] =  cht[y,7] * cht[y,3]  
                         sss = standingvollist[::-1]
-#                        standingarealist[y] = cht[y,3]
-#                        ttt = standingarealist[::-1]
                     rollingSumSSS = np.cumsum(sss)                
                     target_age = targetage(sss, targetvol)
                     remainvol = target_age[1]
-                    targetIndex = target_age[0]
-#                    print targetIndex                    
+                    targetIndex = target_age[0]                  
                     cohortFelled = target_age[2]
-                    remainarea = remainvol / cht[endpoint_cht-targetIndex-1,7]  
-#                    print "- %.d -  target < available" % year # ageClassCount                   
+                    remainarea = remainvol / cht[endpoint_cht-targetIndex-1,7]                   
                     volclearfelled = targetvol   
                     cfVolCheck = volclearfelled 
-                    clearedArea = 0 
+                    clearedArea2 = 0 
                     newAreaFelled = 0
                     for z in range(z, endpoint_cht-targetIndex-1):  
                         cai[z] = cht[z,8]
@@ -368,14 +336,12 @@ while year <= 2030:
                         b.writerow(output)
                         cht[z,3] = area[z]
                         cht[z,7] = volha[z]
-                        run_check_inc_one += check_inc[z]                                 
+                        volIncNotFelled += check_inc[z]                                 
                     for z in range(endpoint_cht - targetIndex -1, endpoint_cht - targetIndex):
                         cai[z] = cht[z,8]
-#                        felledCohort = cht[z,3] 
-#                        newAreaFelled += cht[z,3]
                         newarea = cht[z,3]
                         area[z] = prevarea_cht[z] 
-                        OtherClearedArea = newarea - remainarea
+                        clearedArea1 = newarea - remainarea
                         del newarea
                         ageClass[z] = cht[z,2]
                         adjvol[z] = prevvol_cht[z] # + remainvol                        
@@ -385,15 +351,11 @@ while year <= 2030:
                         volha[z] = volinc(cai[z], area[z], adjvol[z])  #adjvol[z])
                         newvolha = volinc(cai[z], remainarea, remainvol) 
                         newstandingvol[z] =  volha[z]*area[z]
-                        # new cohort added
+######### new cohort added
                         if targetIndex == 0:
                             nextarea = remainarea
                             prevarea_cht.insert(z,remainarea)  #cht[z,3])
                             prevarea_cht[z] = cht[z-1,3]
-#                            newvolha = volha[z]
-    #                        prevvol_cht[z] = cht[z-1,3]*cht[z-1,7]
-#                            prevvol_cht.insert(z, newstandingvol[z]) 
-#                            print partHarvested
                             prevvol_cht.insert(z+1,remainvol)                            
                             prevvol_cht[z] = cht[z-1,3]*cht[z-1,7]
 #                            prevvol_cht.insert(z+1,remainvol)  # remainvol)
@@ -411,15 +373,10 @@ while year <= 2030:
                         elif targetIndex != 0:
                             nextarea = remainarea # prevarea_cht[z] #cht[z+1,3]
                             partAreaHarvest = prevarea_cht[z] - nextarea
-#                            OtherClearedArea =   cht[z+1,3]
                             partHarvested = cht[z,3]*cht[z,7] - remainvol
                             newvolha = volinc(cai[z], remainarea, remainvol) 
                             prevarea_cht.insert(z,remainarea)  #cht[z,3])
                             prevarea_cht[z] = cht[z-1,3]
-#                            newvolha = volha[z]
-    #                        prevvol_cht[z] = cht[z-1,3]*cht[z-1,7]
-#                            prevvol_cht.insert(z, newstandingvol[z]) 
-#                            print partHarvested
                             prevvol_cht.insert(z+1,remainvol)                            
                             prevvol_cht[z] = cht[z-1,3]*cht[z-1,7]
 #                            prevvol_cht.insert(z+1,remainvol)  # remainvol)
@@ -434,62 +391,38 @@ while year <= 2030:
                             output = ([cht[0,0], " %.d" % year, " %.d" % (ageClass[z]+1), " %.d" % prevarea_cht[z], " %.2f" % prevvol_cht[z]])
                             b.writerow(output)                             
                             
-                        check_inc[z] = newstandingvol[z] - cht[z,7] * cht[z,3]  # + chk_newvol        
+                        check_inc[z] = newstandingvol[z] - cht[z,7] * cht[z,3]       
     
                         cht[z,3] = area[z]
                         cht[z,7] = volha[z]         
-                        run_check_inc_two += check_inc[z] 
+                        volIncFelled += check_inc[z] 
                     for z in range(endpoint_cht-targetIndex, endpoint_cht):
-#                #  THIS loop only qualifies when targetIndex > 0
+########  THIS loop only qualifies when targetIndex > 0
                         cai[z] = cht[z,8] 
                         area[z] = cht[z,3] 
-                        clearedArea += cht[z,3] 
+                        clearedArea2 += cht[z,3] 
                         newAreaFelled += cht[z,3]
-                        ageClass[z] = cht[z,2] 
-#                        standingvol[z] = cht[z,7] * cht[z,3]                        
+                        ageClass[z] = cht[z,2]                      
                         adjvol[z] = prevvol_cht[z]                       
                         harvested[z] = adjvol[z]
                         area[z] = 0
-#                        prevarea_cht[z] = 0
-                        adjvol[z] = 0  # standingvol
+                        adjvol[z] = 0  
                         volha[z] = volinc(cai[z], area[z], adjvol[z])                     
-                        newstandingvol[z] = volha[z]*area[z]
-#                        prevvol_cht[z] = 0  
+                        newstandingvol[z] = volha[z]*area[z] 
                         check_inc[z] = newstandingvol[z] - cht[z,7] * cht[z,3]                       
                         cht[z,3] = area[z]
                         cht[z,7] = volha[z]
-                        run_check_inc_three += check_inc[z]  
-#                    if 'cats' in locals():        
-#                        cht = np.vstack([cht, newrow]) 
-##                        output = (["newrow", " %.d" % year, " %.d" % cht[(z+1),2], " %.2F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),  " %.2F" % partHarvested  ])
-##                        a.writerow(output)
-##                        output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
-##                        b.writerow(output)
-#                        del cats   
-#                        del newrow        
-#                    if 'eagle' in locals():
-#                        cht = np.vstack([cht, nextrow]) 
-##                        output = (["nextrow", " %.d" % year, " %.d" % cht[(z+1),2], " %.2F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),  " %.2F" % partHarvested  ])
-##                        a.writerow(output)
-##                        output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
-##                        b.writerow(output)
-#                        del eagle   
-#                        del nextrow                         
-                    if 'run_check_inc_two' in locals():
-                        run_check_inc = run_check_inc_one + run_check_inc_two # + run_check_inc_early
-                    if 'run_check_inc_three' in locals():
-                        run_check_inc = run_check_inc + run_check_inc_three
-#                    TotalClearedArea = clearedArea +  OtherClAreaCheck    # + OtherClearedArea #
-                    clearfell_area_cht = clearedArea +  OtherClearedArea   #partAreaHarvest  #OtherClAreaCheck    
-#                    clearfell_area_cht = newAreaFelled - remainarea
+                        volIncFelled2 += check_inc[z]  
+########  volume checks throughout re: "volIncFelled"                        
+                    if 'volIncFelled' in locals():
+                        volIncPostHarvest = volIncNotFelled + volIncFelled # + volIncPreHarvest
+                    if 'volIncFelled2' in locals():
+                        volIncPostHarvest = volIncPostHarvest + volIncFelled2
+                    clearfell_nextcycle_cht = clearedArea2 +  clearedArea1   
                     remainarea = 0
-                    clearedArea = 0
-                    print "- %.d -  target < available" % year # newAreaFelled # clearfell_area_cht 
-#                    print targetIndex
-#                    print cht[0,0]
-                    ClearfellCheck = clearfell_area_cht
-                    clearfell_nextcycle_cht =   clearfell_area_cht  # TotalClearedArea
-                    clearfell_area_cht = 0       
+                    clearedArea1 = 0                    
+                    clearedArea2 = 0
+                    print "- %.d -  target < available" % year   
                     break
                 elif targetvol >= availablevolume_cf:
                     areafelled = availablearea_cf #0 
@@ -499,24 +432,21 @@ while year <= 2030:
                     cfVolCheck[z] = volclearfelled
                     runVolCheck += cfVolCheck[z]
                     for z in range(z, endpoint_cht):    
-#                        print "   woot"
                         cai[z] = cht[z,8]
                         ageClass[z] = cht[z,2] 
-#                        areafelled += cht[z,3] 
                         adjvol[z] = prevvol_cht[z]                                 
                         harvested[z] = cht[z,3]*cht[z,7] 
                         if ageClass[z] == endpoint_cht - ageClassCount:
-#                        cht[z,3]*cht[z,7] == availablevolume_cf:
-                            area[z] = prevarea_cht[z]  #areamod(0, prevarea_cht[z-1])
+                            area[z] = prevarea_cht[z] 
                             prevarea_cht[z] = cht[z-1,3] 
                             volha[z] = volinc(cai[z], area[z], adjvol[z])
                             newstandingvol[z] = volha[z]*area[z]                        
                             prevvol_cht[z] =  cht[z-1,3]*cht[z-1,7]                             
                         else:
                             area[z] = 0 
-                            prevarea_cht[z] = 0# cht[z-1,3]
-                            adjvol[z] = 0    #standingvol
-                            prevvol_cht[z] = 0# cht[z-1,3]*cht[z-1,7]                      
+                            prevarea_cht[z] = 0
+                            adjvol[z] = 0 
+                            prevvol_cht[z] = 0                   
                             volha[z] = volinc(cai[z], area[z], adjvol[z])
                             newstandingvol[z] = volha[z]*area[z] 
                         if area[z] > 0:
@@ -528,15 +458,12 @@ while year <= 2030:
                         check_inc[z] = newstandingvol[z] - cht[z,7] * cht[z,3]
                         cht[z,3] = area[z]
                         cht[z,7] = volha[z]                    
-                        run_check_inc += check_inc[z]                 
-                    clearfell_area_cht = areafelled
-                    clearfell_nextcycle_cht = clearfell_area_cht
-                    clearfell_area_cht = 0  
+                        volIncPostHarvest += check_inc[z]     
+                    clearfell_nextcycle_cht = areafelled 
                     break    
             else:
-            #####  area & volume modification = pre-thin & pre-cf and no clearfells              
-                ageClass[z] = cht[z,2]      
-#                newarea = cht[z,3]                
+######## area & volume modification = pre-thin & pre-cf and no clearfells              
+                ageClass[z] = cht[z,2]                
                 volha[z] = cht[z,7]  
                 cai[z] = cht[z,8]        
                 if z == 0:
@@ -551,6 +478,7 @@ while year <= 2030:
                     newstandingvol[z] = area[z]*volha[z]
                     prevvol_cht[z] = 0  # cht[z-1,7]  #cht[z-1,3]*cht[z-1,7] 
                 elif z == endpoint_cht-1:
+######### new cohort added                    
                     newarea = cht[z,3]                    
                     area[z] = prevarea_cht[z]
                     prevarea_cht.insert(z+1,area[z])
@@ -559,12 +487,10 @@ while year <= 2030:
                     newstandingvol[z] = area[z]*volha[z]
                     prevvol_cht[z] = cht[z-1,3]*cht[z-1,7]                     
                     newadjvol = newstandingvol[z] # adjvol[z]
-                    chk_newvol = newadjvol
                     prevvol_cht.insert(z+1,area[z]*volha[z]) # newarea*newvolha)# area[z]*cht[z,7])                        
                     newrow = [None]*9                    
                     newrow = np.array((cht[0,0], YC_cht, (ageClass[z]+increment), newarea, 0, 0, 0, newvolha, (cai[z]-1)), dtype = object)
                     dinosaur = 7777     
-#                    clearfell_nextcycle_cht = newarea
                 else:            
                     area[z] = prevarea_cht[z]                  
                     volha[z] = volinc(cai[z], area[z], adjvol[z])                                         
@@ -589,9 +515,9 @@ while year <= 2030:
                     b.writerow(output)                        
                 cht[z,3] = area[z]
                 cht[z,7] = volha[z] 
-                run_check_inc_early += check_inc[z] 
+                volIncPreHarvest += check_inc[z] 
                 
-                runTotalThin_cht += actualthinvol[z] 
+                thinTotal += actualthinvol[z] 
                 actualthinvol[z] = 0                 
    
                 if 'dinosaur' in locals():        
@@ -601,34 +527,20 @@ while year <= 2030:
                     output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
                     b.writerow(output)
                     del dinosaur  
-                    del newrow
-#        n = np.sum((np.where(cht[:,3] >0),np.where(cht[:,5]>0)),axis = 1)[0][-1]
-#        cht = cht[:(n+1)]                    
-#        if 'cats' in locals():        
-#            cht = np.vstack([cht, newrow]) 
-##                        output = (["newrow", " %.d" % year, " %.d" % cht[(z+1),2], " %.2F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),  " %.2F" % partHarvested  ])
-##                        a.writerow(output)
-##                        output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
-##                        b.writerow(output)
-#            del cats   
-#            del newrow        
-#        if 'eagle' in locals():
-#            cht = np.vstack([cht, nextrow]) 
-##                        output = (["nextrow", " %.d" % year, " %.d" % cht[(z+1),2], " %.2F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),  " %.2F" % partHarvested  ])
-##                        a.writerow(output)
-##                        output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
-##                        b.writerow(output)
-#            del eagle   
-#            del nextrow              
-        run_check_inc = run_check_inc + run_check_inc_early  
+                    del newrow   
+
+
+########  more volume checks
+        volIncPostHarvest = volIncPostHarvest + volIncPreHarvest  
         finalvoltotal = 0
         sumarea = 0
         presum = 0
         finalvol = [None]*endpoint_cht        
-        sumvolcheck333 = 0
-        EndRunVol = 0
+        volumeCheck2 = 0
+        
+########  area check        
         for z in range(endpoint_cht):       
-            sumvolcheck333 += cht[z,7] * cht[z,3] 
+            volumeCheck2 += cht[z,7] * cht[z,3] 
             presum += cht[z,3]
         if 'newarea' in locals():
             sumarea = presum  + newarea
@@ -637,20 +549,13 @@ while year <= 2030:
             sumarea = presum + nextarea
             del nextarea
         else:
-            sumarea = presum
-            
-        if 'chk_newvol' in locals():
-            EndRunVol = sumvolcheck333  + chk_newvol  
-            run_check_inc = run_check_inc + chk_newvol
-            chk_newvol = 0
-        else:
-            EndRunVol = sumvolcheck333                      
+            sumarea = presum                                 
         areaTotal = sumarea  + clearfell_nextcycle_cht  
                   
-        LatestFinalVolume = originalvoltotal + run_check_inc 
-        output = (["VolCheck1 = %.d" % LatestFinalVolume])
+        volumeCheck1 = originalvoltotal + volIncPostHarvest 
+        output = (["VolCheck1 = %.d" % volumeCheck1])
         a.writerow(output)    
-        output = (["VolCheck2 = %.d" % EndRunVol] )   
+        output = (["VolCheck2 = %.d" % volumeCheck2] )   
         a.writerow(output)      
         output = (["Area check = %.2F" % areaTotal ])
         a.writerow(output)  
@@ -658,47 +563,41 @@ while year <= 2030:
         a.writerow(output)         
         output = (["Volume TargetTh = %.d" % targetThVolume ])    
         a.writerow(output)      
-        output = (["Volume Thinned = %.d" % runTotalThin_cht ])    
+        output = (["Volume Thinned = %.d" % thinTotal ])    
         a.writerow(output)  
+        
         if type(clearfell_nextcycle_cht) == str:
-            output = (["cf_area_nextcycle = NoCf"])  #  % clearfell_nextcycle_PA12])
+            output = (["cf_area_nextcycle = NoCf"])  
             a.writerow(output)
         else:        
             output = (["cf_area_nextcycle = %.2F" % clearfell_nextcycle_cht])
             a.writerow(output) 
         if year > 2000:
-            sum_sv = LatestFinalVolume
-#            sum_hv += runTotalThin_cht + volclearfelled
+            sum_sv = volumeCheck1
+#            sum_hv += thinTotal + volclearfelled
             output = (["summary_st_vol = %.2f" % sum_sv])
             a.writerow(output)
-#            output = (["summary_hv_vol = %.2f" % sum_hv])
-#            a.writerow(output)
-#        n = np.sum((np.where(cht[:,3] >0),np.where(cht[:,5]>0)),axis = 1)[0][-1]
-#        cht = cht[:(n+1)]
+            
+########  These two lines removing lines of trailing zeros     
         n = np.sum((np.where(cht[:,3] >0),np.where(cht[:,5]>0)),axis = 1)[0][-1]
-        cht = cht[:(n+1)]                    
+        cht = cht[:(n+1)]   
+                 
         if 'cats' in locals():        
             cht = np.vstack([cht, newrow]) 
-#                        output = (["newrow", " %.d" % year, " %.d" % cht[(z+1),2], " %.2F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),  " %.2F" % partHarvested  ])
-#                        a.writerow(output)
-#                        output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
-#                        b.writerow(output)
             del cats   
             del newrow        
         if 'eagle' in locals():
             cht = np.vstack([cht, nextrow]) 
-#                        output = (["nextrow", " %.d" % year, " %.d" % cht[(z+1),2], " %.2F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),  " %.2F" % partHarvested  ])
-#                        a.writerow(output)
-#                        output = ([cht[0,0], " %.d" % year, " %.d" % cht[z+1,2], " %.d" % prevarea_cht[z+1], " %.2f" % prevvol_cht[z+1]])
-#                        b.writerow(output)
             del eagle   
-            del nextrow              
+            del nextrow      
+            
         if 'volclearfelled' in locals():
-            sum_hv = runTotalThin_cht + volclearfelled            
+            sum_hv = thinTotal + volclearfelled            
             output = (["Volume Clearfelled = %.2f" % volclearfelled ])    
             a.writerow(output)  
             output = (["summary_hv_vol = %.2f" % sum_hv])
-            a.writerow(output)            
+            a.writerow(output)   
+########  These lines keep the prev* lists in line with the cht matrix            
             while len(prevarea_cht) > len(cht)  :
                 prevarea_cht.pop()         
             while len(prevvol_cht) > len(cht) :
@@ -712,7 +611,7 @@ while year <= 2030:
         a.writerow(output)  
         endpoint_cht = len(cht)
         
-    # end renaming:
+######## end cohort re-naming:
         if cohort == 0:    
             PA12 = cht
             endpoint_PA12 = endpoint_cht
@@ -746,9 +645,10 @@ while year <= 2030:
             annual_sv = sum_sv + annual_sv
             annual_hv = sum_hv + annual_hv             
         cht = 0
-        runTotalThin_cht = 0
+        thinTotal = 0
         remainvol = 0
-        targetIndex = 0         
+        targetIndex = 0     
+        
 #    ANUUAL SUMMARIES
 #    annual_sv += sum_sv
     output = (["Annual_summary_st_vol = %.2f" % annual_sv])
