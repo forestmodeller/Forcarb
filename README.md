@@ -1,12 +1,30 @@
 # Forcarb
 
-The forest estate is represented by matrix detailing cohort (spruce, pine, etc), yield class, age (age class), area, biomass, volume per hectare and the current annual increment of that cohort.
+The forest estate is represented by matrix detailing cohort (spruce, pine, etc) yield class, age (age class), area, biomass, volume per hectare and the current annual increment of that cohort. The cohorts above are further classified by soil (peat and non-peat).
+
+There are two main scripts (so far).
+
+The 1st script prepares the input data.
+
+Using equations from Boudewyn et al 2007 and Li et al 2003 the volume per ha by species cohort is converted into biomass pool growth curves: merchBark, foliage and otherWood.
+
+The biomass of the stem that is merchantable is evluated, next the non-merchantable stem biomass is found. The sum of these enables calculation of the sap biomass.... proportions... 
+
+These curves are then smoothed using the approach specified by S. Kull (CBM). Note, results for broadleaf species much more accurate when smoothing is disabled.
+
+Increments are evaluated by subtracting the biomass at t1 from t2.
+
+The increments are appended to the original input file.
+
+The 2nd script conducts the simulation.
+
+Note: This will be run separately for afforestation scenarios (AR) and existing forests (FM). Increments from above are assumed identical for peat and non-peat cohorts. The only difference is the starting condition of Pool19, this is equal to 92 if non-peat and 0 if peat.
 
 The matrix is fed into the program and divided up into cohorts. A cohort is a species at a productivity class.
 
-These are processed by the main program code on an annual basis.
+These cohorts are processed by the main program code on an annual step basis and aggregated into a common pool at the end of each annual step.
 
-The area comprising a cohort ages one year at a time. In that year, the volume of the cohort is grown incrementally according to the Forestry Commission yield tables. During a ‘run’, thinnings and final harvests are undertaken according to rules (see below). To complete a run, the area that is clearfelled becomes the new area in the next run.
+The area comprising a cohort ages one year at a time. In that year, the volume of the cohort is grown incrementally according to the Chapmann-Richards growth function, previously calibrated by the Irish NFI. During a ‘run’, thinnings and final harvests are undertaken according to rules (see below). To complete a run, the area that is clearfelled becomes the new area in the next run.
 
 The code outputs the modified cohort matrix together with summary totals: standing volume, harvested volume. These are collated and will be used to estimate biomass pools using the biomass functions.
 
@@ -42,5 +60,28 @@ For harvest there are two main categories:
 2) If the target harvest is less than the available volume
 
 more to follow ...
+
+### Biomass steps
+
+In AR, as the estate increases in age, the biomass increments (merchBark, foliage, otherWood) are appended to the output file dependent on the afforestation area amount (if any).
+
+above ground biomass = sum(area*(merchBark + foliage + otherWood))
+below ground biomass = sbiombg(agbiomass)
+[Li et all equations]  fineRoot, coarseRoot turnover (caluculated in units of biomass, not C)
+
+Stem, branch, foliate and coarse root turnover amounts are calculated and moved to the receiving DOM pools.
+
+Decay transfer dynamics undertaken.
+
+Harvest wood product transfers undertaken.
+
+### Checks
+
+A series of checks are is undertaken to ensure conservation of mass balance, etc.
+
+cohorts updated
+
+output file produced
+
 
 
