@@ -1,8 +1,10 @@
-# Forcarb
+### Forcarb
 
 The forest estate is represented by matrix detailing cohort (spruce, pine, etc) yield class, age (age class), area, biomass, volume per hectare and the current annual increment of that cohort. The cohorts above are further classified by soil (peat and non-peat).
 
 There are two main scripts (so far).
+
+### 1st script
 
 The 1st script prepares the input data.
 
@@ -15,6 +17,8 @@ These curves are then smoothed using the approach specified by S. Kull (CBM). No
 Increments are evaluated by subtracting the biomass at t1 from t2.
 
 The increments are appended to the original input file.
+
+### 2nd script
 
 The 2nd script conducts the simulation.
 
