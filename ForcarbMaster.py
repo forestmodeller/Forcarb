@@ -21,21 +21,19 @@ startTime = datetime.now()
 ######## user input
 # list items here that require changing depending on objective:   targets, age_cf, AR rate, spp mix, hwp factors  
 # check trailing zeros commenting!
-#   soil = 81
+#   PEAT = 92   - TALK TO KB KB KB
+#   hectare = 400 ---- size of stand
 #   HWP for FM ask kb
 #    Ci=FM user-defined, It equals 0 in AR  == pools 32 & 33
     
 ######## file management
     
-#os.chdir("D:\\Data\\Cloudstation\\Notes & work\\IrishLandUSes\\Matrix")
-os.chdir("D:\\Documents\\Cloudstation\\Notes & work\\IrishLandUSes\\Matrix")
+os.chdir("D:\\Data\\Cloudstation\\Notes & work\\IrishLandUSes\\Matrix")
+#os.chdir("D:\\Documents\\Cloudstation\\Notes & work\\IrishLandUSes\\Matrix")
 
 ######## main input file
-#df = pd.read_csv("Files/FinalAR_Actual_newCai.csv", names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI'])
-df = pd.read_csv("Test7\\AR_fgb_400_nosmooth.csv", names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI',' BiomassAG', ' MerchBark', ' OtherWood', ' Foliage', 'AreaAffor'])
+df = pd.read_csv("Test7\\AR_FULL2_400.csv", names = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI',' BiomassAG', ' MerchBark', ' OtherWood', ' Foliage', 'AreaAffor'])
 
-######## new Affor Area
-#afforArea = pd.read_csv("Test3/afforArea.csv", names = ['cohort','step','afforArea'])
 
 ######## Harvest targets, Clearfell & Thinning rules by year
 with open('Test3\HarvestTargets.csv', mode='r') as infile:
@@ -44,13 +42,7 @@ with open('Test3\HarvestTargets.csv', mode='r') as infile:
 with open('Test3\\HarvestTargets.csv', mode='r') as infile:
     reader = csv.reader(infile)    
     HarvCFparm = dict((rows[0],rows[2]) for rows in reader) 
-#with open('HarvestTargets.csv', mode='r') as infile:
-#    reader = csv.reader(infile)     
-#    HarvTHparm = dict((rows[0],rows[3]) for rows in reader) 
-#with open('HarvestTargets.csv', mode='r') as infile:
-#    reader = csv.reader(infile)     
-#    HarvCFparm = dict((rows[0],rows[4]) for rows in reader)  
-##        mydict = {rows[0]:rows[1] for rows in reader}   #p3    
+  
 
 with open('Test3\\newClearfellRules.csv', mode='r') as infile:
     reader = csv.reader(infile)
@@ -89,42 +81,86 @@ with open('Files\\disturbance_matrices\\affor.csv', mode = 'r') as infile:
 with open('Files\\disturbance_matrices\\defor.csv', mode = 'r') as infile:
     deformatrix = infile.readlines() 
 
-   
+
+
+######## CBM output files 
+#      https://stackoverflow.com/questions/30216573/reading-specific-columns-from-a-text-file-in-python
+infile = open('Files\\Report\\CBM_Full.csv', "r")
+lines = infile.readlines()
+delimiter = ","
+FoliageCBM = []
+OtherCBM = []
+MerchCBM = []
+AboveCBM = []
+CoarseCBM = []
+FineCBM = []
+BelowCBM = []
+AbVeryFastCBM = []
+AbFastCBM = []
+MediumCBM = []
+AbSlowCBM = []
+BgVeryFastCBM = []
+BgFastCBM = []
+BgSlowCBM = []
+SnagBranchCBM = []
+SnagStemCBM = []
+DeltaDOM = []
+DeltaBiomass = []
+DeltaEcosystem = []
+
+for x in lines:
+    FoliageCBM.append(float(x.split(delimiter)[1]))
+    OtherCBM.append(float(x.split(delimiter)[2]))
+    MerchCBM.append(float(x.split(delimiter)[3]))
+    AboveCBM.append(float(x.split(delimiter)[4]))
+    CoarseCBM.append(float(x.split(delimiter)[5]))
+    FineCBM.append(float(x.split(delimiter)[6]))
+    BelowCBM.append(float(x.split(delimiter)[7]))
+    AbVeryFastCBM.append(float(x.split(delimiter)[8]))
+    AbFastCBM.append(float(x.split(delimiter)[9]))
+    MediumCBM.append(float(x.split(delimiter)[10]))
+    AbSlowCBM.append(float(x.split(delimiter)[11]))
+    BgVeryFastCBM.append(float(x.split(delimiter)[12]))
+    BgFastCBM.append(float(x.split(delimiter)[13]))
+    BgSlowCBM.append(float(x.split(delimiter)[14]))
+    SnagBranchCBM.append(float(x.split(delimiter)[15]))
+    SnagStemCBM.append(float(x.split(delimiter)[16]))
+    DeltaDOM.append(float(x.split(delimiter)[17]))
+    DeltaBiomass.append(float(x.split(delimiter)[18]))
+#    DeltaEcosystem.append(float(x.split(delimiter)[19]))
+infile.close()        
+    
+    
 ######## DOM parameters
 DOM = pd.read_csv("Files\\DOMparams.csv", names = ['DOM_FoliageSW','DOM_FoliageHW', 'DOM_STO', 'DOM_BranchSW', 'DOM_BranchHW', 'DOM_StemSnagSW', 'DOM_StemSnagHW', 'DOM_BranchSnagSW', 'DOM_BranchSnagHW','DOM_CoarseRoot','DOM_FRTO'])  #, 'DOM_CoarseRoot','DOM_FRTO','DOM_OWTO',''])
   
 ######## DisturbancEvent parameters
-TARG = pd.read_csv("Test3\\targetsFileNewCF.csv", names = ['Species','Amount', 'Step'])  #, 'DOM_BranchSW', 'DOM_BranchHW', 'DOM_StemSnagSW', 'DOM_StemSnagHW', 'DOM_BranchSnagSW', 'DOM_BranchSnagHW'])  #, 'DOM_CoarseRoot','DOM_FRTO','DOM_OWTO',''])
-TARGth = pd.read_csv("Test3\\targetsFileNewTH.csv", names = ['Species','Amount', 'Step'])  #, 'DOM_BranchSW', 'DOM_BranchHW', 'DOM_StemSnagSW', 'DOM_StemSnagHW', 'DOM_BranchSnagSW', 'DOM_BranchSnagHW'])  #, 'DOM_CoarseRoot','DOM_FRTO','DOM_OWTO',''])
+TARG = pd.read_csv("Test3\\targetsFileNewCF.csv", names = ['Species','Amount', 'Step'])  
+TARGth = pd.read_csv("Test3\\targetsFileNewTH.csv", names = ['Species','Amount', 'Step'])  
 
 ######## HWP parameters
 HWP = pd.read_csv("Files\\HWPparams.csv", names = ['dummy', 'halfLife', 'frac_th', 'frac_cf', 'carb_frac'])
 
-
-#sp = 'IE_Cmix'
-#step = 4
-#fist = TARG[(TARG['Species'] == sp) & (TARG['Step'] == step)]
-#targetVolume = fist.iloc[[0],[1]]
-#
-#def cftarget(TARG, species, step):
-#    sp = species
-#    step = step
-#    line = TARG[(TARG['Species'] == sp) & (TARG['Step'] == step)]
-#    targetcf = line.iloc[[0],[1]]
-#    return targetcf
     
 ########  output file(s)
-commaout = open('Test7\\Output_Test7_affor_nodist_fgb_400ha_noSmooth_ucd2.csv',mode='w', newline = '')
+commaout = open('Test7\\Output_Test7_affor_nodist_FULL_400.csv',mode='w', newline = '')
 a = csv.writer(commaout, dialect='excel', delimiter=',')  
-#prevout = open('Files/prevarea_out.csv',mode='wb')
-#b = csv.writer(prevout, dialect='excel', delimiter=',')  
-headers = 'Cohort', ' Year', ' Age', ' Area', ' VolPerHa', ' StandingVol', ' Thin/CF volume (if any)'  #' Standing Vol',
+headers = 'Cohort', ' Year', ' Age', ' Area', ' VolPerHa', ' StandingVol', ' Thin/CF volume (if any)' 
 a.writerow(headers)
 output = (["____________________________________________________________________"])        
 a.writerow(output)
 output = ([" "])        
 a.writerow(output)
     
+commaout_pool = open('Test7\\Poolscsv.csv',mode='w', newline = '')
+b = csv.writer(commaout_pool, dialect='excel', delimiter=',')  
+headers = 'Year', ' StandAge', 'poolbgDOMslow1', 'poolMerchBk1', 'poolFoliage1', 'poolOther1', 'poolagDOMveryfast1', 'poolbgDOMveryfast1', 'poolagDOMfast1', 'poolbgDOMfast1', 'poolmedium1', 'poolagDOMslow1', 'poolsnagStem1', 'poolsnagBranch1', 'poolAgbiomass1', 'poolcoarseRoots1', 'poolfineRoots1', 'poolBelow1'
+b.writerow(headers)
+
+commaout_stats = open('Test8\\Output_Test8_stats.csv', mode = 'w', newline = '')
+c = csv.writer(commaout_stats, dialect = 'excel', delimiter = ',')
+headers = 'Pool',  'RMSE', 'Bias%'
+c.writerow(headers)
     
 ######## cohort managment
 PA = DataFrame(df, columns = ['FT', 'YC','Age', 'Area', 'Litter', 'Stump', 'DW', 'Volha','CAI',' BiomassAG', ' MerchBark', ' OtherWood', ' Foliage', 'AreaAffor'])
@@ -206,189 +242,181 @@ PS20p = PS20p.values
 
 ######## more cohort management
 ######## begin cohort re-naming:
-cohortlist = 24 #(1,2)   # PA12, PA16, etc.
-for cohort in range(1):  # cohortlist
-    if cohort == 0: 
+cohortlist = 24    # PA12, PA16, etc.
+for cohort in range(cohortlist):  # cohortlist
+    if cohort == 0:      
+        prevarea_PA12 = [None]*endpoint_PA12
+        prevvol_PA12 = [None]*endpoint_PA12
+        prev_volha_PA12 = [None]*endpoint_PA12
+        prevarea_PA12, prevvol_PA12, prev_volha_PA12 = matrixFunctions.previous(PA12, endpoint_PA12, prevarea_PA12, prevvol_PA12, prev_volha_PA12)
+        bm_cohort = 0
+    if cohort == 1: 
+        prevarea_PA16 = [None]*endpoint_PA16
+        prevvol_PA16 = [None]*endpoint_PA16
+        prev_volha_PA16 = [None]*endpoint_PA16
+        prevarea_PA16, prevvol_PA16, prev_volha_PA16 = matrixFunctions.previous(PA16, endpoint_PA16, prevarea_PA16, prevvol_PA16, prev_volha_PA16) 
+#        prev_volha_PA16 = prevvol_PA16 / prevarea_PA16        
+        bm_cohort = 0
+    if cohort == 2:  
+        prevarea_PA20 = [None]*endpoint_PA20
+        prevvol_PA20 = [None]*endpoint_PA20
+        prev_volha_PA20 = [None]*endpoint_PA20
+        prevarea_PA20, prevvol_PA20, prev_volha_PA20 = matrixFunctions.previous(PA20, endpoint_PA20, prevarea_PA20, prevvol_PA20, prev_volha_PA20)  
+#        prev_volha_PA20 = prevvol_PA20 / prevarea_PA20
+        bm_cohort = 0
+    if cohort == 3: 
+        prevarea_PA24 = [None]*endpoint_PA24
+        prevvol_PA24 = [None]*endpoint_PA24
+        prev_volha_PA24 = [None]*endpoint_PA24
+        prevarea_PA24, prevvol_PA24, prev_volha_PA24 = matrixFunctions.previous(PA24, endpoint_PA24, prevarea_PA24, prevvol_PA24, prev_volha_PA24)  
+#        prev_volha_PA24 = prevvol_PA24 / prevarea_PA24
+        bm_cohort = 0
+    if cohort == 4: 
+        prevarea_PA30 = [None]*endpoint_PA30
+        prevvol_PA30 = [None]*endpoint_PA30
+        prev_volha_PA30 = [None]*endpoint_PA30
+        prevarea_PA30, prevvol_PA30, prev_volha_PA30 = matrixFunctions.previous(PA30, endpoint_PA30, prevarea_PA30, prevvol_PA30, prev_volha_PA30)  
+#        prev_volha_PA30 = prevvol_PA30 / prevarea_PA30
+        bm_cohort = 0  
+    if cohort == 5: 
+        prevarea_PS12 = [None]*endpoint_PS12
+        prevvol_PS12 = [None]*endpoint_PS12
+        prev_volha_PS12 = [None]*endpoint_PS12
+        prevarea_PS12, prevvol_PS12, prev_volha_PS12 = matrixFunctions.previous(PS12, endpoint_PS12, prevarea_PS12, prevvol_PS12, prev_volha_PS12)  
+#        prev_volha_PS12 = prevvol_PS12 / prevarea_PS12      
+        bm_cohort = 1        
+    if cohort == 6:
+        prevarea_PS20 = [None]*endpoint_PS20
+        prevvol_PS20 = [None]*endpoint_PS20
+        prev_volha_PS20 = [None]*endpoint_PS20
+        prevarea_PS20, prevvol_PS20, prev_volha_PS20 = matrixFunctions.previous(PS20, endpoint_PS20, prevarea_PS20, prevvol_PS20, prev_volha_PS20)  
+#        prev_volha_PS20 = prevvol_PS20 / prevarea_PS20
+        bm_cohort = 1 
+    if cohort == 7:  
+        prevarea_OC = [None]*endpoint_OC
+        prevvol_OC = [None]*endpoint_OC
+        prev_volha_OC = [None]*endpoint_OC
+        prevarea_OC, prevvol_OC, prev_volha_OC = matrixFunctions.previous(OC, endpoint_OC, prevarea_OC, prevvol_OC, prev_volha_OC)  
+#        prev_volha_OC = prevvol_OC / prevarea_OC
+        bm_cohort = 2
+    if cohort == 8:
+        prevarea_Cmix = [None]*endpoint_Cmix
+        prevvol_Cmix = [None]*endpoint_Cmix
+        prev_volha_Cmix = [None]*endpoint_Cmix
+        prevarea_Cmix, prevvol_Cmix, prev_volha_CBmix = matrixFunctions.previous(Cmix, endpoint_Cmix, prevarea_Cmix, prevvol_Cmix, prev_volha_Cmix)  
+#        prev_volha_Cmix = prevvol_Cmix / prevarea_Cmix
+        bm_cohort = 2
+    if cohort == 9:
+        prevarea_CBmix = [None]*endpoint_CBmix
+        prevvol_CBmix = [None]*endpoint_CBmix
+        prev_volha_CBmix = [None]*endpoint_CBmix
+        prevarea_CBmix, prevvol_CBmix, prev_volha_CBmix = matrixFunctions.previous(CBmix, endpoint_CBmix, prevarea_CBmix, prevvol_CBmix, prev_volha_CBmix)  
+#        prev_volha_CBmix = prevvol_CBmix / prevarea_CBmix
+        bm_cohort = 3
+    if cohort == 10:
         prevarea_FGB = [None]*endpoint_FGB
         prevvol_FGB = [None]*endpoint_FGB
         prev_volha_FGB = [None]*endpoint_FGB
         prevarea_FGB, prevvol_FGB, prev_volha_FGB = matrixFunctions.previous(FGB, endpoint_FGB, prevarea_FGB, prevvol_FGB, prev_volha_FGB)   
-#        prev_volha_FGB = prevvol_FGB / prevarea_FGB  
-        bm_cohort = 3        
-#        prevarea_PA12 = [None]*endpoint_PA12
-#        prevvol_PA12 = [None]*endpoint_PA12
-#        prev_volha_PA12 = [None]*endpoint_PA12
-#        prevarea_PA12, prevvol_PA12, prev_volha_PA12 = matrixFunctions.previous(PA12, endpoint_PA12, prevarea_PA12, prevvol_PA12, prev_volha_PA12)
-#        bm_cohort = 0
-#    if cohort == 1: 
-#        prevarea_PA16 = [None]*endpoint_PA16
-#        prevvol_PA16 = [None]*endpoint_PA16
-#        prev_volha_PA16 = [None]*endpoint_PA16
-#        prevarea_PA16, prevvol_PA16, prev_volha_PA16 = matrixFunctions.previous(PA16, endpoint_PA16, prevarea_PA16, prevvol_PA16, prev_volha_PA16) 
-##        prev_volha_PA16 = prevvol_PA16 / prevarea_PA16        
-#        bm_cohort = 0
-#    if cohort == 2:  
-#        prevarea_PA20 = [None]*endpoint_PA20
-#        prevvol_PA20 = [None]*endpoint_PA20
-#        prev_volha_PA20 = [None]*endpoint_PA20
-#        prevarea_PA20, prevvol_PA20, prev_volha_PA20 = matrixFunctions.previous(PA20, endpoint_PA20, prevarea_PA20, prevvol_PA20, prev_volha_PA20)  
-##        prev_volha_PA20 = prevvol_PA20 / prevarea_PA20
-#        bm_cohort = 0
-#    if cohort == 3: 
-#        prevarea_PA24 = [None]*endpoint_PA24
-#        prevvol_PA24 = [None]*endpoint_PA24
-#        prev_volha_PA24 = [None]*endpoint_PA24
-#        prevarea_PA24, prevvol_PA24, prev_volha_PA24 = matrixFunctions.previous(PA24, endpoint_PA24, prevarea_PA24, prevvol_PA24, prev_volha_PA24)  
-##        prev_volha_PA24 = prevvol_PA24 / prevarea_PA24
-#        bm_cohort = 0
-#    if cohort == 4: 
-#        prevarea_PA30 = [None]*endpoint_PA30
-#        prevvol_PA30 = [None]*endpoint_PA30
-#        prev_volha_PA30 = [None]*endpoint_PA30
-#        prevarea_PA30, prevvol_PA30, prev_volha_PA30 = matrixFunctions.previous(PA30, endpoint_PA30, prevarea_PA30, prevvol_PA30, prev_volha_PA30)  
-##        prev_volha_PA30 = prevvol_PA30 / prevarea_PA30
-#        bm_cohort = 0  
-#    if cohort == 5: 
-#        prevarea_PS12 = [None]*endpoint_PS12
-#        prevvol_PS12 = [None]*endpoint_PS12
-#        prev_volha_PS12 = [None]*endpoint_PS12
-#        prevarea_PS12, prevvol_PS12, prev_volha_PS12 = matrixFunctions.previous(PS12, endpoint_PS12, prevarea_PS12, prevvol_PS12, prev_volha_PS12)  
-##        prev_volha_PS12 = prevvol_PS12 / prevarea_PS12      
-#        bm_cohort = 1        
-#    if cohort == 6:
-#        prevarea_PS20 = [None]*endpoint_PS20
-#        prevvol_PS20 = [None]*endpoint_PS20
-#        prev_volha_PS20 = [None]*endpoint_PS20
-#        prevarea_PS20, prevvol_PS20, prev_volha_PS20 = matrixFunctions.previous(PS20, endpoint_PS20, prevarea_PS20, prevvol_PS20, prev_volha_PS20)  
-##        prev_volha_PS20 = prevvol_PS20 / prevarea_PS20
-#        bm_cohort = 1 
-#    if cohort == 7:  
-#        prevarea_OC = [None]*endpoint_OC
-#        prevvol_OC = [None]*endpoint_OC
-#        prev_volha_OC = [None]*endpoint_OC
-#        prevarea_OC, prevvol_OC, prev_volha_OC = matrixFunctions.previous(OC, endpoint_OC, prevarea_OC, prevvol_OC, prev_volha_OC)  
-##        prev_volha_OC = prevvol_OC / prevarea_OC
-#        bm_cohort = 2
-#    if cohort == 8:
-#        prevarea_Cmix = [None]*endpoint_Cmix
-#        prevvol_Cmix = [None]*endpoint_Cmix
-#        prev_volha_Cmix = [None]*endpoint_Cmix
-#        prevarea_Cmix, prevvol_Cmix, prev_volha_CBmix = matrixFunctions.previous(Cmix, endpoint_Cmix, prevarea_Cmix, prevvol_Cmix, prev_volha_Cmix)  
-##        prev_volha_Cmix = prevvol_Cmix / prevarea_Cmix
-#        bm_cohort = 2
-#    if cohort == 9:
-#        prevarea_CBmix = [None]*endpoint_CBmix
-#        prevvol_CBmix = [None]*endpoint_CBmix
-#        prev_volha_CBmix = [None]*endpoint_CBmix
-#        prevarea_CBmix, prevvol_CBmix, prev_volha_CBmix = matrixFunctions.previous(CBmix, endpoint_CBmix, prevarea_CBmix, prevvol_CBmix, prev_volha_CBmix)  
-##        prev_volha_CBmix = prevvol_CBmix / prevarea_CBmix
-#        bm_cohort = 3
-#    if cohort == 10:
-#        prevarea_FGB = [None]*endpoint_FGB
-#        prevvol_FGB = [None]*endpoint_FGB
-#        prev_volha_FGB = [None]*endpoint_FGB
-#        prevarea_FGB, prevvol_FGB, prev_volha_FGB = matrixFunctions.previous(FGB, endpoint_FGB, prevarea_FGB, prevvol_FGB, prev_volha_FGB)   
-##        prev_volha_FGB = prevvol_FGB / prevarea_FGB
-#        bm_cohort = 3
-#    if cohort == 11:
-#        prevarea_SGB = [None]*endpoint_SGB
-#        prevvol_SGB = [None]*endpoint_SGB
-#        prev_volha_SGB = [None]*endpoint_SGB
-#        prevarea_SGB, prevvol_SGB, prev_volha_SGB = matrixFunctions.previous(SGB, endpoint_SGB, prevarea_SGB, prevvol_SGB, prev_volha_SGB)  
-##        prev_volha_SGB = prevvol_SGB / prevarea_SGB
-#        bm_cohort = 4
-#                
-#    if cohort == 12: 
-#        prevarea_PA12p = [None]*endpoint_PA12p
-#        prevvol_PA12p = [None]*endpoint_PA12p
-#        prev_volha_PA12p = [None]*endpoint_PA12p
-#        prevarea_PA12p, prevvol_PA12p, prev_volha_PA12p = matrixFunctions.previous(PA12p, endpoint_PA12p, prevarea_PA12p, prevvol_PA12p, prev_volha_PA12p)
-#        bm_cohort = 0
-#    if cohort == 13: 
-#        prevarea_PA16p = [None]*endpoint_PA16p
-#        prevvol_PA16p = [None]*endpoint_PA16p
-#        prev_volha_PA16p = [None]*endpoint_PA16p
-#        prevarea_PA16p, prevvol_PA16p, prev_volha_PA16p = matrixFunctions.previous(PA16p, endpoint_PA16p, prevarea_PA16p, prevvol_PA16p, prev_volha_PA16p) 
-##        prev_volha_PA16 = prevvol_PA16 / prevarea_PA16        
-#        bm_cohort = 0
-#    if cohort == 14:  
-#        prevarea_PA20p = [None]*endpoint_PA20p
-#        prevvol_PA20p = [None]*endpoint_PA20p
-#        prev_volha_PA20p = [None]*endpoint_PA20p
-#        prevarea_PA20p, prevvol_PA20p, prev_volha_PA20p = matrixFunctions.previous(PA20p, endpoint_PA20p, prevarea_PA20p, prevvol_PA20p, prev_volha_PA20p)  
-##        prev_volha_PA20 = prevvol_PA20 / prevarea_PA20
-#        bm_cohort = 0
-#    if cohort == 15: 
-#        prevarea_PA24p = [None]*endpoint_PA24p
-#        prevvol_PA24p = [None]*endpoint_PA24p
-#        prev_volha_PA24p = [None]*endpoint_PA24p
-#        prevarea_PA24p, prevvol_PA24p, prev_volha_PA24p = matrixFunctions.previous(PA24p, endpoint_PA24p, prevarea_PA24p, prevvol_PA24p, prev_volha_PA24p)  
-##        prev_volha_PA24 = prevvol_PA24 / prevarea_PA24
-#        bm_cohort = 0
-#    if cohort == 16: 
-#        prevarea_PA30p = [None]*endpoint_PA30p
-#        prevvol_PA30p = [None]*endpoint_PA30p
-#        prev_volha_PA30p = [None]*endpoint_PA30p
-#        prevarea_PA30p, prevvol_PA30p, prev_volha_PA30p = matrixFunctions.previous(PA30p, endpoint_PA30p, prevarea_PA30p, prevvol_PA30p, prev_volha_PA30p)  
-##        prev_volha_PA30 = prevvol_PA30 / prevarea_PA30
-#        bm_cohort = 0  
-#    if cohort == 17: 
-#        prevarea_PS12p = [None]*endpoint_PS12p
-#        prevvol_PS12p = [None]*endpoint_PS12p
-#        prev_volha_PS12p = [None]*endpoint_PS12p
-#        prevarea_PS12p, prevvol_PS12p, prev_volha_PS12p = matrixFunctions.previous(PS12p, endpoint_PS12p, prevarea_PS12p, prevvol_PS12p, prev_volha_PS12p)  
-##        prev_volha_PS12 = prevvol_PS12 / prevarea_PS12      
-#        bm_cohort = 1        
-#    if cohort == 18:
-#        prevarea_PS20p = [None]*endpoint_PS20p
-#        prevvol_PS20p = [None]*endpoint_PS20p
-#        prev_volha_PS20p = [None]*endpoint_PS20p
-#        prevarea_PS20p, prevvol_PS20p, prev_volha_PS20p = matrixFunctions.previous(PS20p, endpoint_PS20p, prevarea_PS20p, prevvol_PS20p, prev_volha_PS20p)  
-##        prev_volha_PS20 = prevvol_PS20 / prevarea_PS20
-#        bm_cohort = 1 
-#    if cohort == 19:  
-#        prevarea_OCp = [None]*endpoint_OCp
-#        prevvol_OCp = [None]*endpoint_OCp
-#        prev_volha_OCp = [None]*endpoint_OCp
-#        prevarea_OCp, prevvol_OCp, prev_volha_OCp = matrixFunctions.previous(OCp, endpoint_OCp, prevarea_OCp, prevvol_OCp, prev_volha_OCp)  
-##        prev_volha_OC = prevvol_OC / prevarea_OC
-#        bm_cohort = 2
-#    if cohort == 20:
-#        prevarea_Cmixp = [None]*endpoint_Cmixp
-#        prevvol_Cmixp = [None]*endpoint_Cmixp
-#        prev_volha_Cmixp = [None]*endpoint_Cmixp
-#        prevarea_Cmixp, prevvol_Cmixp, prev_volha_CBmixp = matrixFunctions.previous(Cmixp, endpoint_Cmixp, prevarea_Cmixp, prevvol_Cmixp, prev_volha_Cmixp)  
-##        prev_volha_Cmix = prevvol_Cmix / prevarea_Cmix
-#        bm_cohort = 2
-#    if cohort == 21:
-#        prevarea_CBmixp = [None]*endpoint_CBmixp
-#        prevvol_CBmixp = [None]*endpoint_CBmixp
-#        prev_volha_CBmixp = [None]*endpoint_CBmixp
-#        prevarea_CBmixp, prevvol_CBmixp, prev_volha_CBmixp = matrixFunctions.previous(CBmixp, endpoint_CBmixp, prevarea_CBmixp, prevvol_CBmixp, prev_volha_CBmixp)  
-##        prev_volha_CBmix = prevvol_CBmix / prevarea_CBmix
-#        bm_cohort = 3
-#    if cohort == 22:
-#        prevarea_FGBp = [None]*endpoint_FGBp
-#        prevvol_FGBp = [None]*endpoint_FGBp
-#        prev_volha_FGBp = [None]*endpoint_FGBp
-#        prevarea_FGBp, prevvol_FGBp, prev_volha_FGBp = matrixFunctions.previous(FGBp, endpoint_FGBp, prevarea_FGBp, prevvol_FGBp, prev_volha_FGBp)   
-##        prev_volha_FGB = prevvol_FGB / prevarea_FGB
-#        bm_cohort = 3
-#    if cohort == 23:
-#        prevarea_SGBp = [None]*endpoint_SGBp
-#        prevvol_SGBp = [None]*endpoint_SGBp
-#        prev_volha_SGBp = [None]*endpoint_SGBp
-#        prevarea_SGBp, prevvol_SGBp, prev_volha_SGBp = matrixFunctions.previous(SGBp, endpoint_SGBp, prevarea_SGBp, prevvol_SGBp, prev_volha_SGBp)  
-##        prev_volha_SGB = prevvol_SGB / prevarea_SGB
-#        bm_cohort = 4        
+#        prev_volha_FGB = prevvol_FGB / prevarea_FGB
+        bm_cohort = 3
+    if cohort == 11:
+        prevarea_SGB = [None]*endpoint_SGB
+        prevvol_SGB = [None]*endpoint_SGB
+        prev_volha_SGB = [None]*endpoint_SGB
+        prevarea_SGB, prevvol_SGB, prev_volha_SGB = matrixFunctions.previous(SGB, endpoint_SGB, prevarea_SGB, prevvol_SGB, prev_volha_SGB)  
+#        prev_volha_SGB = prevvol_SGB / prevarea_SGB
+        bm_cohort = 4
+                
+    if cohort == 12: 
+        prevarea_PA12p = [None]*endpoint_PA12p
+        prevvol_PA12p = [None]*endpoint_PA12p
+        prev_volha_PA12p = [None]*endpoint_PA12p
+        prevarea_PA12p, prevvol_PA12p, prev_volha_PA12p = matrixFunctions.previous(PA12p, endpoint_PA12p, prevarea_PA12p, prevvol_PA12p, prev_volha_PA12p)
+        bm_cohort = 0
+    if cohort == 13: 
+        prevarea_PA16p = [None]*endpoint_PA16p
+        prevvol_PA16p = [None]*endpoint_PA16p
+        prev_volha_PA16p = [None]*endpoint_PA16p
+        prevarea_PA16p, prevvol_PA16p, prev_volha_PA16p = matrixFunctions.previous(PA16p, endpoint_PA16p, prevarea_PA16p, prevvol_PA16p, prev_volha_PA16p) 
+#        prev_volha_PA16 = prevvol_PA16 / prevarea_PA16        
+        bm_cohort = 0
+    if cohort == 14:  
+        prevarea_PA20p = [None]*endpoint_PA20p
+        prevvol_PA20p = [None]*endpoint_PA20p
+        prev_volha_PA20p = [None]*endpoint_PA20p
+        prevarea_PA20p, prevvol_PA20p, prev_volha_PA20p = matrixFunctions.previous(PA20p, endpoint_PA20p, prevarea_PA20p, prevvol_PA20p, prev_volha_PA20p)  
+#        prev_volha_PA20 = prevvol_PA20 / prevarea_PA20
+        bm_cohort = 0
+    if cohort == 15: 
+        prevarea_PA24p = [None]*endpoint_PA24p
+        prevvol_PA24p = [None]*endpoint_PA24p
+        prev_volha_PA24p = [None]*endpoint_PA24p
+        prevarea_PA24p, prevvol_PA24p, prev_volha_PA24p = matrixFunctions.previous(PA24p, endpoint_PA24p, prevarea_PA24p, prevvol_PA24p, prev_volha_PA24p)  
+#        prev_volha_PA24 = prevvol_PA24 / prevarea_PA24
+        bm_cohort = 0
+    if cohort == 16: 
+        prevarea_PA30p = [None]*endpoint_PA30p
+        prevvol_PA30p = [None]*endpoint_PA30p
+        prev_volha_PA30p = [None]*endpoint_PA30p
+        prevarea_PA30p, prevvol_PA30p, prev_volha_PA30p = matrixFunctions.previous(PA30p, endpoint_PA30p, prevarea_PA30p, prevvol_PA30p, prev_volha_PA30p)  
+#        prev_volha_PA30 = prevvol_PA30 / prevarea_PA30
+        bm_cohort = 0  
+    if cohort == 17: 
+        prevarea_PS12p = [None]*endpoint_PS12p
+        prevvol_PS12p = [None]*endpoint_PS12p
+        prev_volha_PS12p = [None]*endpoint_PS12p
+        prevarea_PS12p, prevvol_PS12p, prev_volha_PS12p = matrixFunctions.previous(PS12p, endpoint_PS12p, prevarea_PS12p, prevvol_PS12p, prev_volha_PS12p)  
+#        prev_volha_PS12 = prevvol_PS12 / prevarea_PS12      
+        bm_cohort = 1        
+    if cohort == 18:
+        prevarea_PS20p = [None]*endpoint_PS20p
+        prevvol_PS20p = [None]*endpoint_PS20p
+        prev_volha_PS20p = [None]*endpoint_PS20p
+        prevarea_PS20p, prevvol_PS20p, prev_volha_PS20p = matrixFunctions.previous(PS20p, endpoint_PS20p, prevarea_PS20p, prevvol_PS20p, prev_volha_PS20p)  
+#        prev_volha_PS20 = prevvol_PS20 / prevarea_PS20
+        bm_cohort = 1 
+    if cohort == 19:  
+        prevarea_OCp = [None]*endpoint_OCp
+        prevvol_OCp = [None]*endpoint_OCp
+        prev_volha_OCp = [None]*endpoint_OCp
+        prevarea_OCp, prevvol_OCp, prev_volha_OCp = matrixFunctions.previous(OCp, endpoint_OCp, prevarea_OCp, prevvol_OCp, prev_volha_OCp)  
+#        prev_volha_OC = prevvol_OC / prevarea_OC
+        bm_cohort = 2
+    if cohort == 20:
+        prevarea_Cmixp = [None]*endpoint_Cmixp
+        prevvol_Cmixp = [None]*endpoint_Cmixp
+        prev_volha_Cmixp = [None]*endpoint_Cmixp
+        prevarea_Cmixp, prevvol_Cmixp, prev_volha_CBmixp = matrixFunctions.previous(Cmixp, endpoint_Cmixp, prevarea_Cmixp, prevvol_Cmixp, prev_volha_Cmixp)  
+#        prev_volha_Cmix = prevvol_Cmix / prevarea_Cmix
+        bm_cohort = 2
+    if cohort == 21:
+        prevarea_CBmixp = [None]*endpoint_CBmixp
+        prevvol_CBmixp = [None]*endpoint_CBmixp
+        prev_volha_CBmixp = [None]*endpoint_CBmixp
+        prevarea_CBmixp, prevvol_CBmixp, prev_volha_CBmixp = matrixFunctions.previous(CBmixp, endpoint_CBmixp, prevarea_CBmixp, prevvol_CBmixp, prev_volha_CBmixp)  
+#        prev_volha_CBmix = prevvol_CBmix / prevarea_CBmix
+        bm_cohort = 3
+    if cohort == 22:
+        prevarea_FGBp = [None]*endpoint_FGBp
+        prevvol_FGBp = [None]*endpoint_FGBp
+        prev_volha_FGBp = [None]*endpoint_FGBp
+        prevarea_FGBp, prevvol_FGBp, prev_volha_FGBp = matrixFunctions.previous(FGBp, endpoint_FGBp, prevarea_FGBp, prevvol_FGBp, prev_volha_FGBp)   
+#        prev_volha_FGB = prevvol_FGB / prevarea_FGB
+        bm_cohort = 3
+    if cohort == 23:
+        prevarea_SGBp = [None]*endpoint_SGBp
+        prevvol_SGBp = [None]*endpoint_SGBp
+        prev_volha_SGBp = [None]*endpoint_SGBp
+        prevarea_SGBp, prevvol_SGBp, prev_volha_SGBp = matrixFunctions.previous(SGBp, endpoint_SGBp, prevarea_SGBp, prevvol_SGBp, prev_volha_SGBp)  
+#        prev_volha_SGB = prevvol_SGB / prevarea_SGB
+        bm_cohort = 4        
 
 ######## initialise variables
 thinvolume = 0
 prevthinvol = 0
 defor = 0 # 1000
 deforYear = 350
-affor = 0 # 500
-afforYear = 250
 remainvol = 0
 newcohortvol = 0
 new_area = 0
@@ -424,7 +452,6 @@ clearfell_nextcycle_FGBp = 0
 clearfell_nextcycle_SGBp = 0 
 #cohortratio = 0.0833 # 1.0/(cohortlist+1)
 #cohortratio_cf = 0.0833 
-#inventoryCheck = 0   # this check is used to reset the pools when there is no species eg. SGBp
 increment = 1
 newatm = 0
 
@@ -455,7 +482,7 @@ pooldict_temp['pool15'] = 0 # ag fast
 pooldict_temp['pool16'] = 0 # bg fast
 pooldict_temp['pool17'] = 0 # medium
 pooldict_temp['pool18'] = 0 # ag slow
-pooldict_temp['pool19'] = 92 # bg slow    IF PEAT THIS IS 0 ZERO!
+pooldict_temp['pool19'] = 400*77 # bg slow    IF PEAT THIS IS 0 ZERO!   77 = brown  Check SLVattributesDefault...
 pooldict_temp['pool20'] = 0 # sw stem snag
 pooldict_temp['pool21'] = 0 # sw branch snag
 pooldict_temp['pool22'] = 0 # hw stem snag
@@ -512,6 +539,32 @@ FGBppool['pool19'] = 0
 CBmixppool['pool19'] = 0
 Cmixppool['pool19'] = 0
 
+poolMerchBk = []
+poolFoliage = []
+poolOther = []
+poolAgBm = []
+poolAgbiomass= []
+poolcoarseRoots = []
+poolfineRoots = []
+poolBelow = []
+poolsnagBranch = []
+poolsnagStem = []
+poolmedium = []
+poolagDOMfast = []
+poolbgDOMfast = []
+poolagDOMveryfast = []
+poolbgDOMveryfast = []
+poolagDOMslow = []
+poolbgDOMslow = []
+poolDeltaDOM = []
+poolDeltaBiomass = []
+poolDeltaEcosystem = []
+poolDeltaDeadwood = []
+poolDeltaLitter = []
+poolDeltaMineral = []
+poolDeltaOrganic = []
+
+
 #distReturnInterval = 75
 merchBark = 0
 otherWoodBark = 0
@@ -520,6 +573,7 @@ fineRoot = 0
 coarseRoot = 0
 agbiomass = 0
 biomassbg = 0
+biomassbgPool = 0
 #standAgbiomass = 0
 standPool01 = 0
 standPool02 = 0
@@ -529,13 +583,21 @@ standPool08 = 0
 standPool09 = 0
 annualAgbiomass = 0
 annualBgbiomass = 0 
+poolDeltaDOM_old = 0
+poolDeltaBiomass_old = 0
+poolDeltaEcosystem_old = 0
+poolDeltaDeadWood_old = 0
+poolDeltaLitter_old = 0
+poolDeltaMineral_old = 0
+poolDeltaOrganic_old = 0
+
 #  switches
 sthin = 0  # 1 if thinning has taken place
 sclear = 0 # 1 if clearfell has taken place
 sthin_out = 0 # as above except specifically for output
 sclear_out = 0
 peat = 1   # if peat = 0, then it's mineral
-# harwood = 0   if SW, 1 if HW
+# hardwood = 0   if SW, 1 if HW
 
 newStandPA12 = np.zeros([1,14],dtype = int)
 newStandPA16 = np.zeros([1,14],dtype = int)
@@ -571,24 +633,110 @@ standAge = 0
 step = 1
 targAge = 0
 
-while year < 2060:
+#hectare = ? 
+conversion = 0.5
+
+while year < 2090:
     standAge += 1
     targAge += 1
     fullpool = pooldict_temp.copy()
     fullpool['pool19'] = 0
     annualAgbiomass = 0
     annualBgbiomass = 0    
-    for cohort in range(1):  # cohortlist    
+    for cohort in range(12):  # cohortlist    
         ######## stores each cohort's respective variables    
-#        pooldict = {}
-#        standPool01 = 0
-#        standPool02 = 0
-#        standPool03 = 0
-#        standPool07 = 0
-#        standPool08 = 0
-#        standPool09 = 0   
-#        standAgbiomass = 0
-        if cohort == 0:  
+        if cohort == 0:          
+            cht = PA12
+            newStand = newStandPA12
+            clearfell_nextcycle_cht = clearfell_nextcycle_PA12
+            prevarea_cht = prevarea_PA12
+            prevvol_cht = prevvol_PA12
+            prev_volha_cht = prev_volha_PA12
+            hardwood = 0
+            pooldict = PA12pool
+#            TARG.loc[1,cht]
+        elif cohort == 1:  
+            cht = PA16  
+            newStand = newStandPA16
+            clearfell_nextcycle_cht = clearfell_nextcycle_PA16   
+            prevarea_cht = prevarea_PA16
+            prevvol_cht = prevvol_PA16
+            prev_volha_cht = prev_volha_PA16 
+            hardwood = 0
+            pooldict = PA16pool
+        elif cohort == 2: 
+            cht = PA20    
+            newStand = newStandPA20
+            clearfell_nextcycle_cht = clearfell_nextcycle_PA20 
+            prevarea_cht = prevarea_PA20
+            prevvol_cht = prevvol_PA20
+            prev_volha_cht = prev_volha_PA20
+            hardwood = 0
+            pooldict = PA20pool
+        elif cohort == 3: 
+            cht = PA24     
+            newStand = newStandPA24
+            clearfell_nextcycle_cht = clearfell_nextcycle_PA24
+            prevarea_cht = prevarea_PA24
+            prevvol_cht = prevvol_PA24 
+            prev_volha_cht = prev_volha_PA24
+            hardwood = 0
+            pooldict = PA24pool
+        elif cohort == 4:
+            cht = PA30     
+            newStand = newStandPA30
+            clearfell_nextcycle_cht = clearfell_nextcycle_PA30
+            prevarea_cht = prevarea_PA30
+            prevvol_cht = prevvol_PA30 
+            prev_volha_cht = prev_volha_PA30
+            hardwood = 0
+            pooldict = PA30pool
+        elif cohort == 5:
+            cht = PS12       
+            newStand = newStandPS12
+            clearfell_nextcycle_cht = clearfell_nextcycle_PS12
+            prevarea_cht = prevarea_PS12
+            prevvol_cht = prevvol_PS12      
+            prev_volha_cht = prev_volha_PS12   
+            hardwood = 0
+            pooldict = PS12pool
+        elif cohort == 6:
+            cht = PS20  
+            newStand = newStandPS20
+            clearfell_nextcycle_cht = clearfell_nextcycle_PS20
+            prevarea_cht = prevarea_PS20
+            prevvol_cht = prevvol_PS20 
+            prev_volha_cht = prev_volha_PS20
+            hardwood = 0
+            pooldict = PS20pool
+        elif cohort == 7:
+            cht = OC  
+            newStand = newStandOC
+            clearfell_nextcycle_cht = clearfell_nextcycle_OC
+            prevarea_cht = prevarea_OC
+            prevvol_cht = prevvol_OC 
+            prev_volha_cht = prev_volha_OC
+            hardwood = 0
+            pooldict = OCpool
+        elif cohort == 8:
+            cht = Cmix  
+            newStand = newStandCmix
+            clearfell_nextcycle_cht = clearfell_nextcycle_Cmix
+            prevarea_cht = prevarea_Cmix
+            prevvol_cht = prevvol_Cmix 
+            prev_volha_cht = prev_volha_Cmix
+            hardwood = 0
+            pooldict = Cmixpool
+        elif cohort == 9:
+            cht = CBmix       
+            newStand = newStandCBmix
+            clearfell_nextcycle_cht = clearfell_nextcycle_CBmix
+            prevarea_cht = prevarea_CBmix
+            prevvol_cht = prevvol_CBmix 
+            prev_volha_cht = prev_volha_CBmix
+            hardwood = 1
+            pooldict = CBmixpool
+        elif cohort == 10:
             cht = FGB   
             newStand = newStandFGB
             clearfell_nextcycle_cht = clearfell_nextcycle_FGB
@@ -596,115 +744,16 @@ while year < 2060:
             prevvol_cht = prevvol_FGB 
             prev_volha_cht = prev_volha_FGB
             hardwood = 1
-            pooldict = FGBpool            
-#            cht = PA12
-#            newStand = newStandPA12
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PA12
-#            prevarea_cht = prevarea_PA12
-#            prevvol_cht = prevvol_PA12
-#            prev_volha_cht = prev_volha_PA12
-#            hardwood = 0
-#            pooldict = PA12pool
-##            TARG.loc[1,cht]
-#        elif cohort == 1:  
-#            cht = PA16  
-#            newStand = newStandPA16
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PA16   
-#            prevarea_cht = prevarea_PA16
-#            prevvol_cht = prevvol_PA16
-#            prev_volha_cht = prev_volha_PA16 
-#            hardwood = 0
-#            pooldict = PA16pool
-#        elif cohort == 2: 
-#            cht = PA20    
-#            newStand = newStandPA20
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PA20 
-#            prevarea_cht = prevarea_PA20
-#            prevvol_cht = prevvol_PA20
-#            prev_volha_cht = prev_volha_PA20
-#            hardwood = 0
-#            pooldict = PA20pool
-#        elif cohort == 3: 
-#            cht = PA24     
-#            newStand = newStandPA24
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PA24
-#            prevarea_cht = prevarea_PA24
-#            prevvol_cht = prevvol_PA24 
-#            prev_volha_cht = prev_volha_PA24
-#            hardwood = 0
-#            pooldict = PA24pool
-#        elif cohort == 4:
-#            cht = PA30     
-#            newStand = newStandPA30
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PA30
-#            prevarea_cht = prevarea_PA30
-#            prevvol_cht = prevvol_PA30 
-#            prev_volha_cht = prev_volha_PA30
-#            hardwood = 0
-#            pooldict = PA30pool
-#        elif cohort == 5:
-#            cht = PS12       
-#            newStand = newStandPS12
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PS12
-#            prevarea_cht = prevarea_PS12
-#            prevvol_cht = prevvol_PS12      
-#            prev_volha_cht = prev_volha_PS12   
-#            hardwood = 0
-#            pooldict = PS12pool
-#        elif cohort == 6:
-#            cht = PS20  
-#            newStand = newStandPS20
-#            clearfell_nextcycle_cht = clearfell_nextcycle_PS20
-#            prevarea_cht = prevarea_PS20
-#            prevvol_cht = prevvol_PS20 
-#            prev_volha_cht = prev_volha_PS20
-#            hardwood = 0
-#            pooldict = PS20pool
-#        elif cohort == 7:
-#            cht = OC  
-#            newStand = newStandOC
-#            clearfell_nextcycle_cht = clearfell_nextcycle_OC
-#            prevarea_cht = prevarea_OC
-#            prevvol_cht = prevvol_OC 
-#            prev_volha_cht = prev_volha_OC
-#            hardwood = 0
-#            pooldict = OCpool
-#        elif cohort == 8:
-#            cht = Cmix  
-#            newStand = newStandCmix
-#            clearfell_nextcycle_cht = clearfell_nextcycle_Cmix
-#            prevarea_cht = prevarea_Cmix
-#            prevvol_cht = prevvol_Cmix 
-#            prev_volha_cht = prev_volha_Cmix
-#            hardwood = 0
-#            pooldict = Cmixpool
-#        elif cohort == 9:
-#            cht = CBmix       
-#            newStand = newStandCBmix
-#            clearfell_nextcycle_cht = clearfell_nextcycle_CBmix
-#            prevarea_cht = prevarea_CBmix
-#            prevvol_cht = prevvol_CBmix 
-#            prev_volha_cht = prev_volha_CBmix
-#            hardwood = 1
-#            pooldict = CBmixpool
-#        elif cohort == 10:
-#            cht = FGB   
-#            newStand = newStandFGB
-#            clearfell_nextcycle_cht = clearfell_nextcycle_FGB
-#            prevarea_cht = prevarea_FGB
-#            prevvol_cht = prevvol_FGB 
-#            prev_volha_cht = prev_volha_FGB
-#            hardwood = 1
-#            pooldict = FGBpool
-#        elif cohort == 11:
-#            cht = SGB       
-#            newStand = newStandSGB
-#            clearfell_nextcycle_cht = clearfell_nextcycle_SGB
-#            prevarea_cht = prevarea_SGB
-#            prevvol_cht = prevvol_SGB 
-#            prev_volha_cht = prev_volha_SGB
-#            hardwood = 1
-#            pooldict = SGBpool
+            pooldict = FGBpool
+        elif cohort == 11:
+            cht = SGB       
+            newStand = newStandSGB
+            clearfell_nextcycle_cht = clearfell_nextcycle_SGB
+            prevarea_cht = prevarea_SGB
+            prevvol_cht = prevvol_SGB 
+            prev_volha_cht = prev_volha_SGB
+            hardwood = 1
+            pooldict = SGBpool
 #            
 #        if cohort == 12:  
 #            cht = PA12p
@@ -821,6 +870,8 @@ while year < 2060:
         standPool07 = 0
         standPool08 = 0
         standPool09 = 0       
+        
+                    
         
         ########  affor preparation        
         age_cf = 9999999# int(CF_AGE_MIN[cht[0,0]])  #  9999999
@@ -1125,17 +1176,17 @@ while year < 2060:
                         clearfell_nextcycle_cht = areafelled 
                         break
                     
-                if 'holder4' in locals():
-                    cht = np.vstack([cht, newrow4])
-                    sstack = 1
-                    output = (["newrow4", " %.d" % year, " %.d" % cht[(z+1),2], " %.4F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),   " 0.000"])
-                    a.writerow(output)
-                    if prevarea_cht[z+1] == 0:
-                        prev_volha_cht.append(0.0)
-                    else:                        
-                        prev_volha_cht.append(prevvol_cht[z+1] / prevarea_cht[z+1])
-                    del holder4  
-                    del newrow4       
+#                if 'holder4' in locals():
+#                    cht = np.vstack([cht, newrow4])
+#                    sstack = 1
+#                    output = (["newrow4", " %.d" % year, " %.d" % cht[(z+1),2], " %.4F" % cht[z+1,3], " %.2F" % cht[z+1,7],  " %.2F" % (cht[z+1,3]*cht[z+1,7]),   " 0.000"])
+#                    a.writerow(output)
+#                    if prevarea_cht[z+1] == 0:
+#                        prev_volha_cht.append(0.0)
+#                    else:                        
+#                        prev_volha_cht.append(prevvol_cht[z+1] / prevarea_cht[z+1])
+#                    del holder4  
+#                    del newrow4       
             else:
 ######## area & volume modification = pre-thin & pre-cf and no clearfells              
                 ageClass[z] = cht[z,2]                                    
@@ -1205,21 +1256,6 @@ while year < 2060:
                     standPool09 += area[z]*cht[z,11]
                     standPool08 += area[z]*cht[z,12] 
                     
-        agbiomassINC = (standPool07 + standPool08 + standPool09)
-        biomassbgINC = matrixFunctions.sbiombg(agbiomassINC, hardwood)
-        pf = 0.072 + (0.354*(math.exp(-0.06*biomassbgINC)))
-        fineRoot_mass = pf*biomassbgINC
-        coarseRoot_mass = biomassbgINC - fineRoot_mass
-        fineRoot = fineRoot_mass 
-        coarseRoot = coarseRoot_mass 
-        
-        if hardwood == 0:
-            pooldict['pool06'] += fineRoot 
-            pooldict['pool05'] += coarseRoot 
-        else:
-            pooldict['pool12'] += fineRoot
-            pooldict['pool11'] += coarseRoot    
-                    
         if hardwood == 0: 
             pooldict['pool01'] += standPool01
             pooldict['pool03'] += standPool03
@@ -1233,18 +1269,25 @@ while year < 2060:
             agbiomass = pooldict['pool01'] + pooldict['pool02'] + pooldict['pool03']
         else:
             agbiomass = pooldict['pool07'] + pooldict['pool08'] + pooldict['pool09']            
-            
-#        biomassbg = matrixFunctions.sbiombg(agbiomass, hardwood )   
-#        pf = 0.072 + (0.354*(math.exp(-0.06*biomassbg)))
-#        fineRoot = pf*biomassbg
-#        coarseRoot = biomassbg - fineRoot   # (1-pf)*biomassbg 
-#        if hardwood == 0:
-#            pooldict['pool06'] = fineRoot
-#            pooldict['pool05'] = coarseRoot
-#        else:
-#            pooldict['pool12'] = fineRoot
-#            pooldict['pool11'] = coarseRoot 
-#     
+
+        preArea = 0.00001
+        for z in range(endpoint_cht):   
+#            print(z)
+            preArea += newStand[z,3]            
+        hectare = preArea + clearfell_nextcycle_cht
+        
+        biomassbg = matrixFunctions.sbiombg(agbiomass, hardwood)    
+        pf = 0.072 + (0.354*(math.exp(-0.06*biomassbg*(1/conversion)/hectare)))
+        fineRoot = pf*biomassbg
+        coarseRoot = biomassbg - fineRoot   #
+        if hardwood == 0:
+            pooldict['pool06'] = fineRoot 
+            pooldict['pool05'] = coarseRoot 
+        else:
+            pooldict['pool12'] = fineRoot 
+            pooldict['pool11'] = coarseRoot
+#        biomassbg = biomassbg 
+        
         newPool15 = 0
         newPool17 = 0
         newPool18 = 0
@@ -1255,14 +1298,14 @@ while year < 2060:
             sto = pooldict['pool01'] * DOM.loc[0,'DOM_STO']            
             branchto = pooldict['pool03'] * DOM.loc[0,'DOM_BranchSW']    
             foliageto = pooldict['pool02'] * DOM.loc[0,'DOM_FoliageSW'] 
-            frto = pooldict['pool06'] * DOM.loc[0,'DOM_FRTO']
-            crto = pooldict['pool05'] * DOM.loc[0,'DOM_CoarseRoot']  
+            frto = pooldict['pool06'] * DOM.loc[0,'DOM_FRTO'] #* 2
+            crto = pooldict['pool05'] * DOM.loc[0,'DOM_CoarseRoot']  #* 2
         else:
             sto = pooldict['pool07'] * DOM.loc[0,'DOM_STO']            
             branchto = pooldict['pool09'] * DOM.loc[0,'DOM_BranchHW']  
             foliageto = pooldict['pool08'] * DOM.loc[0,'DOM_FoliageHW']   
-            frto = pooldict['pool12'] * DOM.loc[0,'DOM_FRTO']
-            crto = pooldict['pool11'] * DOM.loc[0,'DOM_CoarseRoot']   
+            frto = pooldict['pool12'] * DOM.loc[0,'DOM_FRTO'] 
+            crto = pooldict['pool11'] * DOM.loc[0,'DOM_CoarseRoot']  
                              
         #####  DOM pools receiving
         if hardwood == 0:
@@ -1280,67 +1323,93 @@ while year < 2060:
                      
         #####  Decay transfers dynamics                      
         decaycollection = 0
-        newatm = 0
+        newatm = 0     
         for key in pooldict:
             if key == 'pool20':
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool20'], 0.0187, 0.83, 0.17, 0.032)   # snag stem (sw & hw)
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.0187*temp                  
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool20'], BDR, 0.83, 0.17, 0.032)   # snag stem (sw & hw)
                 pooldict['pool20'] -= (decaycollection[4] + decaycollection[5])
                 newPool18 += decaycollection[2]  # pt agslow
                 newPool17 += decaycollection[5]  # physical xfer
                 newatm += decaycollection[1]
-            if key == 'pool21':    
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool21'], 0.07175, 0.83, 0.17, 0.1)   # snag branch (sw & hw)
+            if key == 'pool21': 
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.07175*temp                  
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool21'], BDR, 0.83, 0.17, 0.1)   # snag branch (sw & hw)
                 pooldict['pool21'] -= (decaycollection[4] + decaycollection[5])
                 newPool18 += decaycollection[2]  # pt agslow   
                 newPool15 += decaycollection[5]  # physical xfer
                 newatm += decaycollection[1]
             if key == 'pool22':
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool22'], 0.0187, 0.83, 0.17, 0.032)   # snag stem (sw & hw)
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.0187*temp                  
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool22'], BDR, 0.83, 0.17, 0.032)   # snag stem (sw & hw)
                 pooldict['pool22'] -= (decaycollection[4] + decaycollection[5])
                 newPool18 += decaycollection[2]  # pt agslow 
                 newPool17 += decaycollection[5]  # physical xfer
                 newatm += decaycollection[1]
             if key == 'pool23':
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool23'], 0.07175, 0.83, 0.17, 0.1)   # snag branch (sw & hw)
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.07175*temp                  
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool23'], BDR, 0.83, 0.17, 0.1)   # snag branch (sw & hw)
                 pooldict['pool23'] -= (decaycollection[4] + decaycollection[5])
                 newPool18 += decaycollection[2]  # pt agslow 
                 newPool15 += decaycollection[5]  # physical xfer
                 newatm += decaycollection[1]
             if key == 'pool17':
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool17'], 0.0374, 0.83, 0.17, 0)   # medium
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.0374*temp                  
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool17'], BDR, 0.83, 0.17, 0)   # medium
                 pooldict['pool17'] -= decaycollection[4]
                 newPool18 += decaycollection[2]  # pt agslow   
                 newatm += decaycollection[1]
             if key == 'pool15':
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool15'], 0.214, 0.9, 0.1, 0)   # ag fast
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.214*temp                  
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool15'], BDR, 0.9, 0.1, 0)   # ag fast
                 pooldict['pool15'] -= decaycollection[4]
                 newPool18 += decaycollection[2]  # pt agslow 
                 newatm += decaycollection[1]
             if key == 'pool13':
-                decaycollection = matrixFunctions.decayFunction(pooldict['pool13'], 0.423, 0.888, 0.112, 0)  # ag very fast
+                temp = math.exp((7.5 - 10)*(math.log(2.65))*0.1)
+                BDR = 0.423*temp
+                decaycollection = matrixFunctions.decayFunction(pooldict['pool13'], BDR, 0.888, 0.112, 0)  # ag very fast
                 pooldict['pool13'] -= decaycollection[4]
                 newPool18 += decaycollection[2]  # pt agslow
                 newatm += decaycollection[1]
             if key == 'pool18':
-                decaycollection = matrixFunctions.decayFunction2(pooldict['pool18'], 0.19, 0.815, 0.185, 0.006)          # ag slow  0.19, 1, 0, 0.006) 
+                temp = math.exp((7.5 - 10)*math.log(2.65)*0.1)
+                BDR = 0.19*temp                
+                decaycollection = matrixFunctions.decayFunction2(pooldict['pool18'], BDR, 0.815, 0.185, 0.006)          # ag slow  0.19, 1, 0, 0.006) 
                 pooldict['pool18'] -= (decaycollection[4] + decaycollection[5])   
 #                newPool19 += decaycollection[3]  # pt bgslow - guess???
                 newPool19 += decaycollection[5]  # physical xfer 
                 newatm += decaycollection[1]
             if key == 'pool16':
-                decaycollection = matrixFunctions.decayFunction2(pooldict['pool16'], 0.1435, 0.83, 0.17, 0)   # bg fast
+                temp = math.exp((7.5 - 10)*math.log(2)*0.1)
+                BDR = 0.1435*temp                  
+                decaycollection = matrixFunctions.decayFunction2(pooldict['pool16'], BDR, 0.83, 0.17, 0)   # bg fast
                 pooldict['pool16'] -= decaycollection[4]
                 newPool19 += decaycollection[3]  # pt bgslow  
                 newatm += decaycollection[1]
             if key == 'pool14':
-                decaycollection = matrixFunctions.decayFunction2(pooldict['pool14'], 0.403, 0.815, 0.185, 0)   # bg very fast
+                temp = math.exp((7.5 - 10)*math.log(2.65)*0.1)
+                BDR = 0.403*temp                   
+                decaycollection = matrixFunctions.decayFunction2(pooldict['pool14'], BDR, 0.815, 0.185, 0)   # bg very fast
                 pooldict['pool14'] -= decaycollection[4]
                 newPool19 += decaycollection[3]  # pt bgslow
                 newatm += decaycollection[1]
             if key == 'pool19':
-                decaycollection = matrixFunctions.decayFunction2(pooldict['pool19'], 0.0033, 1, 0, 0)   # bg slow
+                temp = math.exp((7.5 - 10)*math.log(1)*0.1)
+                BDR = 0.003*temp                   
+                decaycollection = matrixFunctions.decayFunction2(pooldict['pool19'], BDR, 1, 0, 0)   # bg slow
                 pooldict['pool19'] -= decaycollection[4]   
                 newatm += decaycollection[1]
+
+#        ### next two lines are a fix due to age zero in python vs cbm
+#        if standAge == 1:
+#            pooldict['pool19']  = 400*92
       
         pooldict['pool18'] += newPool18
         pooldict['pool17'] += newPool17 
@@ -1353,8 +1422,7 @@ while year < 2060:
             agbiomass = pooldict['pool01'] + pooldict['pool02'] + pooldict['pool03']
         else:
             agbiomass = pooldict['pool07'] + pooldict['pool08'] + pooldict['pool09']
-        biomassbg = matrixFunctions.sbiombg(agbiomass, hardwood )
-        
+
         
     ######## Harvest Wood Products
         Pool30vol = matrixFunctions.svol(inParm1.loc[bm_cohort,'1a'], inParm1.loc[bm_cohort,'1b'], pooldict['pool30']) # pool30 is populated by dist matrices                   
@@ -1380,23 +1448,13 @@ while year < 2060:
             inflow_wbp_th = Pool30vol*HWP.loc[1,'frac_th']*HWP.loc[1,'carb_frac']  
             pooldict['pool33'] = matrixFunctions.harvWoodProd(inflow_wbp_cf + inflow_wbp_th, pooldict['pool33'], HWP.loc[1,'halfLife'])    
             
-#        if inventoryCheck == 0:
-#            pooldict = pooldict_temp.copy()
-#            pooldict['pool19'] = 0
-#        inventoryCheck = 0
-#        d.iterkeys() -> iter(pooldict.keys())
+
         for key in sorted(iter(pooldict.keys())):    
             output = (["%s, %.12f" % (key, pooldict[key])])
-            a.writerow(output) 
-#        output = (["standPool01 = %.4f" % standPool01])
-#        a.writerow(output)
-#        output = (["standPool02 = %.4f" % standPool02])
-#        a.writerow(output)
-#        output = (["standPool03 = %.4f" % standPool03])
-#        a.writerow(output)            
+            a.writerow(output)           
         output = (["annual above ground biomass = %.4f" % agbiomass])
         a.writerow(output)
-        output = (["annual below ground biomass = %.4f" % biomassbg])
+        output = (["annual below ground biomass = %.4f" % biomassbg])  # biomassbgPool
         a.writerow(output) 
 
 ########  more volume checks
@@ -1420,7 +1478,7 @@ while year < 2060:
         else:
             sumarea = presum                                 
         areaTotal = sumarea  + clearfell_nextcycle_cht  
-        
+        oldArea = areaTotal
 ########    Output code     
         output = (["Year = "," %.d" % year])
         a.writerow(output)
@@ -1536,13 +1594,131 @@ while year < 2060:
         fullpool['pool31'] += pooldict['pool31']
         fullpool['pool32'] += pooldict['pool32']
         fullpool['pool33'] += pooldict['pool33']     
-#        for key, value in pooldict.iteritems():
-#            fullpool[key] = value           
-#        annualAgbiomass += agbiomass  
-        annualBgbiomass += biomassbg         
+      
 
+        poolMerchBk1 = (fullpool['pool01'] + fullpool['pool07'] )
+        poolFoliage1 = (fullpool['pool02'] + fullpool['pool08'] )
+        poolOther1 = (fullpool['pool03'] + fullpool['pool09'] )
+        poolcoarseRoots1 = (fullpool['pool05'] + fullpool['pool11'] )
+        poolfineRoots1 = (fullpool['pool06'] + fullpool['pool12'] )
+        poolsnagBranch1 = (fullpool['pool21'] + fullpool['pool23'] )
+        poolsnagStem1 = (fullpool['pool20'] + fullpool['pool22'] ) 
+        poolbgDOMslow1 = fullpool['pool19']
+#        poolagDOMfast1 = fullpool['pool15
+        poolmedium1 = fullpool['pool17']
+        poolagDOMveryfast1 = fullpool['pool13']
+        poolbgDOMveryfast1 = fullpool['pool14']
+        poolagDOMfast1 = fullpool['pool15']
+        poolbgDOMfast1 = fullpool['pool16']
+        poolagDOMslow1 = fullpool['pool18']
+        poolAgbiomass1 = agbiomass
+#        poolBelow1 = biomassbg  # annualBgbiomass
+        
+#        output = ([year, standAge, poolbgDOMslow1, poolMerchBk1, poolFoliage1, poolOther1, poolagDOMveryfast1, poolbgDOMveryfast1, poolagDOMfast1, poolbgDOMfast1, poolmedium1, poolagDOMslow1, poolsnagStem1, poolsnagBranch1, poolAgbiomass1, poolcoarseRoots1, poolfineRoots1, poolBelow1])
+#        b.writerow(output)
+        
 ######## end cohort re-naming:
-        if cohort == 0: 
+        if cohort == 0:                
+            PA12 = cht
+            newStandPA12 = newStand
+            PA12pool = pooldict
+            endpoint_PA12 = endpoint_cht
+            clearfell_nextcycle_PA12 = clearfell_nextcycle_cht     
+            prevarea_PA12 = prevarea_cht
+            prevvol_PA12 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv 
+        elif cohort == 1:
+            PA16 = cht
+            newStandPA16 = newStand
+            PA16pool = pooldict
+            endpoint_PA16 = endpoint_cht
+            clearfell_nextcycle_PA16 = clearfell_nextcycle_cht            
+            prevarea_PA16 = prevarea_cht
+            prevvol_PA16 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv   
+        elif cohort == 2:
+            PA20 = cht
+            newStandPA20 = newStand
+            PA20pool = pooldict
+            endpoint_PA20 = endpoint_cht
+            clearfell_nextcycle_PA20 = clearfell_nextcycle_cht            
+            prevarea_PA20 = prevarea_cht
+            prevvol_PA20 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv  
+        elif cohort == 3:
+            PA24 = cht
+            newStandPA24 = newStand
+            PA24pool = pooldict
+            endpoint_PA24 = endpoint_cht
+            clearfell_nextcycle_PA24 = clearfell_nextcycle_cht            
+            prevarea_PA24 = prevarea_cht
+            prevvol_PA24 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv             
+        elif cohort == 4:
+            PA30 = cht
+            newStandPA30 = newStand
+            PA30pool = pooldict
+            endpoint_PA30 = endpoint_cht
+            clearfell_nextcycle_PA30 = clearfell_nextcycle_cht            
+            prevarea_PA30 = prevarea_cht
+            prevvol_PA30 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv          
+        elif cohort == 5:
+            PS12 = cht
+            newStandPS12 = newStand
+            PS12pool = pooldict
+            endpoint_PS12 = endpoint_cht
+            clearfell_nextcycle_PS12 = clearfell_nextcycle_cht            
+            prevarea_PS12 = prevarea_cht
+            prevvol_PS12 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv              
+        elif cohort == 6:
+            PS20 = cht
+            newStandPS20 = newStand
+            PS20pool = pooldict
+            endpoint_PS20 = endpoint_cht
+            clearfell_nextcycle_PS20 = clearfell_nextcycle_cht            
+            prevarea_PS20 = prevarea_cht
+            prevvol_PS20 = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv  
+        elif cohort == 7:
+            OC = cht
+            newStandOC = newStand
+            OCpool = pooldict
+            endpoint_OC = endpoint_cht
+            clearfell_nextcycle_OC = clearfell_nextcycle_cht            
+            prevarea_OC = prevarea_cht
+            prevvol_OC = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv  
+        elif cohort == 8:
+            Cmix = cht
+            newStandCmix = newStand
+            Cmixpool = pooldict
+            endpoint_Cmix = endpoint_cht
+            clearfell_nextcycle_Cmix = clearfell_nextcycle_cht            
+            prevarea_Cmix = prevarea_cht
+            prevvol_Cmix = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv  
+        elif cohort == 9:
+            CBmix = cht
+            newStandCBmix = newStand
+            CBmixpool = pooldict
+            endpoint_CBmix = endpoint_cht
+            clearfell_nextcycle_CBmix = clearfell_nextcycle_cht            
+            prevarea_CBmix = prevarea_cht
+            prevvol_CBmix = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv  
+        elif cohort == 10:  
             FGB = cht
             newStandFGB = newStand
             FGBpool = pooldict
@@ -1551,126 +1727,17 @@ while year < 2060:
             prevarea_FGB = prevarea_cht
             prevvol_FGB = prevvol_cht
             annual_sv = sum_sv + annual_sv
-            annual_hv = sum_hv + annual_hv               
-#            PA12 = cht
-#            newStandPA12 = newStand
-#            PA12pool = pooldict
-#            endpoint_PA12 = endpoint_cht
-#            clearfell_nextcycle_PA12 = clearfell_nextcycle_cht     
-#            prevarea_PA12 = prevarea_cht
-#            prevvol_PA12 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv 
-#        elif cohort == 1:
-#            PA16 = cht
-#            newStandPA16 = newStand
-#            PA16pool = pooldict
-#            endpoint_PA16 = endpoint_cht
-#            clearfell_nextcycle_PA16 = clearfell_nextcycle_cht            
-#            prevarea_PA16 = prevarea_cht
-#            prevvol_PA16 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv   
-#        elif cohort == 2:
-#            PA20 = cht
-#            newStandPA20 = newStand
-#            PA20pool = pooldict
-#            endpoint_PA20 = endpoint_cht
-#            clearfell_nextcycle_PA20 = clearfell_nextcycle_cht            
-#            prevarea_PA20 = prevarea_cht
-#            prevvol_PA20 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv  
-#        elif cohort == 3:
-#            PA24 = cht
-#            newStandPA24 = newStand
-#            PA24pool = pooldict
-#            endpoint_PA24 = endpoint_cht
-#            clearfell_nextcycle_PA24 = clearfell_nextcycle_cht            
-#            prevarea_PA24 = prevarea_cht
-#            prevvol_PA24 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv             
-#        elif cohort == 4:
-#            PA30 = cht
-#            newStandPA30 = newStand
-#            PA30pool = pooldict
-#            endpoint_PA30 = endpoint_cht
-#            clearfell_nextcycle_PA30 = clearfell_nextcycle_cht            
-#            prevarea_PA30 = prevarea_cht
-#            prevvol_PA30 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv          
-#        elif cohort == 5:
-#            PS12 = cht
-#            newStandPS12 = newStand
-#            PS12pool = pooldict
-#            endpoint_PS12 = endpoint_cht
-#            clearfell_nextcycle_PS12 = clearfell_nextcycle_cht            
-#            prevarea_PS12 = prevarea_cht
-#            prevvol_PS12 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv              
-#        elif cohort == 6:
-#            PS20 = cht
-#            newStandPS20 = newStand
-#            PS20pool = pooldict
-#            endpoint_PS20 = endpoint_cht
-#            clearfell_nextcycle_PS20 = clearfell_nextcycle_cht            
-#            prevarea_PS20 = prevarea_cht
-#            prevvol_PS20 = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv  
-#        elif cohort == 7:
-#            OC = cht
-#            newStandOC = newStand
-#            OCpool = pooldict
-#            endpoint_OC = endpoint_cht
-#            clearfell_nextcycle_OC = clearfell_nextcycle_cht            
-#            prevarea_OC = prevarea_cht
-#            prevvol_OC = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv  
-#        elif cohort == 8:
-#            Cmix = cht
-#            newStandCmix = newStand
-#            Cmixpool = pooldict
-#            endpoint_Cmix = endpoint_cht
-#            clearfell_nextcycle_Cmix = clearfell_nextcycle_cht            
-#            prevarea_Cmix = prevarea_cht
-#            prevvol_Cmix = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv  
-#        elif cohort == 9:
-#            CBmix = cht
-#            newStandCBmix = newStand
-#            CBmixpool = pooldict
-#            endpoint_CBmix = endpoint_cht
-#            clearfell_nextcycle_CBmix = clearfell_nextcycle_cht            
-#            prevarea_CBmix = prevarea_cht
-#            prevvol_CBmix = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv  
-#        elif cohort == 10:  
-#            FGB = cht
-#            newStandFGB = newStand
-#            FGBpool = pooldict
-#            endpoint_FGB = endpoint_cht
-#            clearfell_nextcycle_FGB = clearfell_nextcycle_cht            
-#            prevarea_FGB = prevarea_cht
-#            prevvol_FGB = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv              
-#        elif cohort == 11:
-#            SGB = cht
-#            newStandSGB = newStand
-#            SGBpool = pooldict
-#            endpoint_SGB = endpoint_cht
-#            clearfell_nextcycle_SGB = clearfell_nextcycle_cht            
-#            prevarea_SGB = prevarea_cht
-#            prevvol_SGB = prevvol_cht
-#            annual_sv = sum_sv + annual_sv
-#            annual_hv = sum_hv + annual_hv  
+            annual_hv = sum_hv + annual_hv              
+        elif cohort == 11:
+            SGB = cht
+            newStandSGB = newStand
+            SGBpool = pooldict
+            endpoint_SGB = endpoint_cht
+            clearfell_nextcycle_SGB = clearfell_nextcycle_cht            
+            prevarea_SGB = prevarea_cht
+            prevvol_SGB = prevvol_cht
+            annual_sv = sum_sv + annual_sv
+            annual_hv = sum_hv + annual_hv  
 #
 #        if cohort == 12:                 
 #            PA12p = cht
@@ -1801,12 +1868,80 @@ while year < 2060:
         sclear_out = 0   
         
     annualAgbiomass += fullpool['pool01'] + fullpool['pool02'] + fullpool['pool03'] + fullpool['pool07'] + fullpool['pool08'] + fullpool['pool09'] 
+    annualBgbiomass += fullpool['pool05'] + fullpool['pool06'] + fullpool['pool11'] + fullpool['pool12']        
 
+    poolBelow1 = annualBgbiomass
+    
+    
+######   CBM pools
+    poolMerchBk.append(fullpool['pool01'] + fullpool['pool07'] )
+    poolFoliage.append(fullpool['pool02'] + fullpool['pool08'] )
+    poolOther.append(fullpool['pool03'] + fullpool['pool09'] )
+    poolAgbiomass.append(annualAgbiomass)
+    poolcoarseRoots.append(fullpool['pool05'] + fullpool['pool11'] )
+    poolfineRoots.append(fullpool['pool06'] + fullpool['pool12'] )
+    poolBelow.append(annualBgbiomass)  # biomassbg
+    poolsnagBranch.append(fullpool['pool21'] + fullpool['pool23'] )
+    poolsnagStem.append(fullpool['pool20'] + fullpool['pool22'] )
+    poolmedium.append(fullpool['pool17'] )
+    poolagDOMfast.append(fullpool['pool15'] )
+    poolbgDOMfast.append(fullpool['pool16'] )
+    poolagDOMveryfast.append(fullpool['pool13'] )
+    poolbgDOMveryfast.append(fullpool['pool14'] )
+    poolagDOMslow.append(fullpool['pool18'] )
+    poolbgDOMslow.append(fullpool['pool19'] )
         
     for key in sorted(iter(fullpool.keys())):   
         output = (["Fullpool_%s: %.12f" % (key, fullpool[key])])
         a.writerow(output)         
-        
+
+    output = ([year, standAge, poolbgDOMslow1, poolMerchBk1, poolFoliage1, poolOther1, poolagDOMveryfast1, poolbgDOMveryfast1, poolagDOMfast1, poolbgDOMfast1, poolmedium1, poolagDOMslow1, poolsnagStem1, poolsnagBranch1, poolAgbiomass1, poolcoarseRoots1, poolfineRoots1, poolBelow1])
+    b.writerow(output)        
+
+######   Carbon Stock Change
+#    stock_new = sum(fullpool.values())
+#    stockChange = stock_new - stock_old
+#    stock_old = stock_new
+#    output = (["CarbonStockChange = "," %.2f" % stockChange]) 
+#    a.writerow(output)
+
+    poolDeltaDOM_new = fullpool['pool13'] + fullpool['pool14'] + fullpool['pool15'] + fullpool['pool16'] + fullpool['pool17'] + fullpool['pool18'] + fullpool['pool19']
+    Delta = poolDeltaDOM_new - poolDeltaDOM_old
+    poolDeltaDOM_old = poolDeltaDOM_new
+    poolDeltaDOM.append(Delta)
+    
+    poolDeltaBiomass_new = fullpool['pool01'] + fullpool['pool02'] + fullpool['pool03'] + fullpool['pool05'] + fullpool['pool06'] + fullpool['pool07'] + fullpool['pool08'] + fullpool['pool09'] + fullpool['pool11'] + fullpool['pool12']
+    Delta = poolDeltaBiomass_new - poolDeltaBiomass_old
+    poolDeltaBiomass_old = poolDeltaBiomass_new
+    poolDeltaBiomass.append(Delta)
+      
+    poolDeltaDeadWood_new = fullpool['pool20'] + fullpool['pool21'] + fullpool['pool22'] + fullpool['pool23'] + fullpool['pool17'] + fullpool['pool16']
+    Delta = poolDeltaDeadWood_new - poolDeltaDeadWood_old
+    poolDeltaDeadWood_old = poolDeltaDeadWood_new
+    poolDeltaDeadwood.append(Delta)    
+
+    poolDeltaLitter_new = fullpool['pool13'] + fullpool['pool15'] + fullpool['pool18']
+    Delta = poolDeltaLitter_new - poolDeltaLitter_old
+    poolDeltaLitter_old = poolDeltaLitter_new
+    poolDeltaLitter.append(Delta)  
+
+#    poolDeltaMineral_new = fullpool['pool02'] + fullpool['pool08'] 
+#    Delta = poolDeltaMineral_new - poolDeltaMineral_old
+#    poolDeltaMineral_old = poolDeltaMineral_new
+#    poolDeltaMineral.append(Delta) 
+#
+#    poolDeltaOrganic_new = fullpool['pool02'] + fullpool['pool08'] 
+#    Delta = poolDeltaOrganic_new - poolDeltaOrganic_old
+#    poolDeltaOrganic_old = poolDeltaOrganic_new
+#    poolDeltaOrganic.append(Delta)
+
+#    poolDeltaEcosystem_new = sum(fullpool.values())
+#    Delta = poolDeltaEcosystem_new - poolDeltaEcosystem_old
+#    poolDeltaEcosystem_old = poolDeltaEcosystem_new 
+#    poolDeltaEcosystem.append(Delta)    
+    
+
+    
     if prevarea_cht[z] == 0:
         prev_volha_cht[z] = 0
     else:
@@ -1823,7 +1958,9 @@ while year < 2060:
     output = (["Annual_summary_st_vol = "," %.2f" % annual_sv])
     a.writerow(output)    
     output = (["Annual_summary_hv_vol = ","%.2f" % annual_hv])
-    a.writerow(output)    
+    a.writerow(output) #
+    output = (["pf = "," %.3f" % pf])  
+    a.writerow(output)      
     output = ([" "])  
     a.writerow(output) 
 #    output = ([" "])
@@ -1838,8 +1975,48 @@ while year < 2060:
     step += 1
     sthin = 0
     sclear = 0
+
+    
+matrixFunctions.agbmpoolFoliage(poolFoliage, FoliageCBM, standAge)      
+matrixFunctions.agbmpoolMerch(poolMerchBk, MerchCBM, standAge)   
+matrixFunctions.agbmpoolOther(poolOther, OtherCBM, standAge)   
+matrixFunctions.agbmpoolCoarse(poolcoarseRoots, CoarseCBM, standAge)   
+matrixFunctions.agbmpoolFine(poolfineRoots, FineCBM, standAge)   
+matrixFunctions.agbmpoolBelow(poolBelow, BelowCBM, standAge) 
+matrixFunctions.agbmpoolAbVeryFast(poolagDOMveryfast, AbVeryFastCBM, standAge) 
+matrixFunctions.agbmpoolAbFast(poolagDOMfast, AbFastCBM, standAge) 
+matrixFunctions.agbmpoolMedium(poolmedium, MediumCBM, standAge) 
+matrixFunctions.agbmpoolAbSlow(poolagDOMslow, AbSlowCBM, standAge) 
+matrixFunctions.agbmpoolBgVeryFast(poolbgDOMveryfast, BgVeryFastCBM, standAge) 
+matrixFunctions.agbmpoolBgFast(poolbgDOMfast, BgFastCBM, standAge) 
+matrixFunctions.agbmpoolBgSlow(poolbgDOMslow, BgSlowCBM, standAge) 
+matrixFunctions.agbmpoolSnagBranch(poolsnagBranch, SnagBranchCBM, standAge) 
+matrixFunctions.agbmpoolSnagStem(poolsnagStem, SnagStemCBM, standAge) 
+matrixFunctions.agbmpoolDeltaDOM(poolDeltaDOM, DeltaDOM, standAge) 
+matrixFunctions.agbmpoolDeltaBiomass(poolDeltaBiomass, DeltaBiomass, standAge) 
+
+#matrixFunctions.agbmpoolDeltaEcosystem(poolDeltaEcosystem, DeltaEcosystem, standAge) 
+#matrixFunctions.fillPlot(poolcoarseRoots, poolfineRoots, poolOther, poolMerchBk, poolFoliage, standAge)   
+#matrixFunctions.fillPlot2(poolcoarseRoots, poolfineRoots, poolOther, poolMerchBk, poolFoliage, standAge)   
+
+
+#for f,b in zip(poolFoliage, FoliageCBM):
+
+biaspc = matrixFunctions.bias(poolFoliage, FoliageCBM)
+for x in biaspc:
+    output = (['Foliage', x])
+    c.writerow(output)
+
+
+rmse = matrixFunctions.rmse(poolFoliage, FoliageCBM)
+output = (['Foliage', rmse])
+c.writerow(output)
+
+
 frequency = 500  # Set Frequency To 2500 Hertz
 duration = 100  # Set Duration To 1000 ms == 1 second
 #winsound.Beep(frequency, duration)
 print('script duration = ',  datetime.now() - startTime)
 commaout.close() 
+commaout_pool.close() 
+commaout_stats.close()
